@@ -1,1 +1,4 @@
-
+.container {color: orange}
+#myid {color: blue}
+p.yellow {
+    color: yellow;}

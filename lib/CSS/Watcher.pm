@@ -8,31 +8,81 @@ use Data::Dumper;
 
 use File::Basename qw/dirname basename/;
 use File::Spec;
+use File::Path qw/mkpath rmtree/;
+use Digest::MD5 qw/md5_hex/;
+
+use CSS::Watcher::Parser;
+use CSS::Watcher::Monitor;
+use File::Slurp qw/read_file write_file/;
+
 
 sub new {
     my $class= shift;
     my $options = shift;
 
     return bless ({
-        home => $options->{home} // undef,
-        monitor => File::Monitor->new,
+        home => $options->{home} // "~/.emacs.d/ac-html/",
+        parser => CSS::Watcher::Parser->new(),
     }, $class)
 }
 
-sub add {
+sub update {
     my $self = shift;
     my $obj = shift;
 
-    # check what is the monobj. file? dir? http?
+    # check what is the monobj. file? dir?
     if (-f $obj || -d $obj) {
-        $self->{monitor}->watch ({name => $obj, recurse => 1});
-        $self->{monitor}->scan;
-        # my @obj = $self->{monitor}->files;
-        print Dumper \$self->{monitor};
-        
-    } elsif ($obj =~m/^http/) {
+        my $proj_dir = $self->get_project_dir ($obj);
 
+        my $prj = $self->_get_project ($proj_dir);
+
+        # scan new or changed files, cache them
+        my $changes = 0;
+        $prj->{monitor}->scan (
+            sub {
+                my $file = shift;
+                if ($file =~ m/.css$/) {
+                    $changes++;
+                    my $data = read_file ($file);
+                    my ($classes, $ids) = $self->{parser}->parse_css ($data);
+                    $prj->{parsed}{$file} = {CLASSES => $classes,
+                                             IDS => $ids};
+                }
+            });
+
+        # # have changes? dump all classes and id completion.
+        if ($changes) {
+            # build unique tag - class,id
+            my (%classes, %ids);
+            while ( my ( $file, $completions ) = each %{$prj->{parsed}} ) {
+                while ( my ( $tag, $classes ) = each %{$completions->{CLASSES}} ) {
+                    foreach (@{$classes}) {
+                        $classes{$tag}{$_} .= 'Defined in ' . File::Spec->abs2rel ($file, $proj_dir) . '\n';
+                    }
+                }
+            }
+            while ( my ( $file, $completions ) = each %{$prj->{parsed}} ) {
+                while ( my ( $tag, $ids ) = each %{$completions->{IDS}} ) {
+                    foreach (@{$ids}) {
+                        $ids{$tag}{$_} .= 'Defined in ' . File::Spec->abs2rel ($file, $proj_dir) . '\n';
+                    }
+                }
+            }
+            return ($proj_dir, \%classes, \%ids);
+        }
     }
+}
+
+sub _get_project {
+    my $self = shift;
+    my $dir = shift;
+    return unless defined $dir;
+
+    unless (exists $self->{PROJECTS}{$dir}) {
+        $self->{PROJECTS}{$dir} = 
+            bless ( {monitor => CSS::Watcher::Monitor->new({dir => $dir})}, 'CSS::Watcher::Project' );
+    }
+    return $self->{PROJECTS}{$dir};
 }
 
 # Lookup for project dir similar to projectile.el
@@ -43,15 +93,15 @@ sub get_project_dir {
     my $pdir = ! defined ($obj) ? undef:
                (-f $obj) ? dirname ($obj) :
                (-d $obj) ? $obj : undef;
+    return unless (defined $pdir);
 
-    return unless defined $pdir;
+    $pdir = File::Spec->rel2abs($pdir);
 
     foreach (qw/.projectile .watcher .git .hg .fslckout .bzr _darcs/) {
         if (-e File::Spec->catfile($pdir, $_)) {
             return $pdir;
         }
     }
-
     #parent dir
     return $self->get_project_dir (dirname($pdir));
 }
