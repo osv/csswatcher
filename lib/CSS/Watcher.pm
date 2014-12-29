@@ -1,0 +1,105 @@
+package CSS::Watcher;
+
+use strict; 
+use warnings;
+
+use Carp;
+use Data::Dumper;
+
+use File::Basename qw/dirname basename/;
+use File::Spec;
+
+sub new {
+    my $class= shift;
+    my $options = shift;
+
+    return bless ({
+        home => $options->{home} // undef,
+        monitor => File::Monitor->new,
+    }, $class)
+}
+
+sub add {
+    my $self = shift;
+    my $obj = shift;
+
+    # check what is the monobj. file? dir? http?
+    if (-f $obj || -d $obj) {
+        $self->{monitor}->watch ({name => $obj, recurse => 1});
+        $self->{monitor}->scan;
+        # my @obj = $self->{monitor}->files;
+        print Dumper \$self->{monitor};
+        
+    } elsif ($obj =~m/^http/) {
+
+    }
+}
+
+# Lookup for project dir similar to projectile.el
+sub get_project_dir {
+    my $self = shift;
+    my $obj = shift;
+
+    my $pdir = ! defined ($obj) ? undef:
+               (-f $obj) ? dirname ($obj) :
+               (-d $obj) ? $obj : undef;
+
+    return unless defined $pdir;
+
+    foreach (qw/.projectile .watcher .git .hg .fslckout .bzr _darcs/) {
+        if (-e File::Spec->catfile($pdir, $_)) {
+            return $pdir;
+        }
+    }
+
+    #parent dir
+    return $self->get_project_dir (dirname($pdir));
+}
+
+1;
+
+__END__
+
+=head1 NAME
+
+CSS::Watcher - class, id completion for ac-html
+
+=head1 SYNOPSIS
+
+   use CSS::Watcher;
+   my $cw = CSS::Watcher->new ();
+
+=head1 DESCRIPTION
+
+Watch for changes in css files, parse them and populate ac-html completion.
+
+Blah blah blah.
+
+=head2 EXPORT
+
+None by default.
+
+=head1 SEE ALSO
+
+Mention other useful documentation such as the documentation of
+related modules or operating system documentation (such as man pages
+in UNIX), or any relevant external documentation such as RFCs or
+standards.
+
+=head1 AUTHOR
+
+Olexandr Sydorchuk (olexandr.syd@gmail.com)
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2014 by Olexandr Sydorchuk
+
+This program is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.8.2 or,
+at your option, any later version of Perl 5 you may have available.
+
+=head1 BUGS
+
+None reported... yet.
+
+=cut
