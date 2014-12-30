@@ -9,11 +9,11 @@ use Data::Dumper;
 use File::Basename qw/dirname basename/;
 use File::Spec;
 use File::Path qw/mkpath rmtree/;
-use Digest::MD5 qw/md5_hex/;
+use Log::Log4perl qw(:easy);
+use File::Slurp qw/read_file write_file/;
 
 use CSS::Watcher::Parser;
 use CSS::Watcher::Monitor;
-use File::Slurp qw/read_file write_file/;
 
 
 sub new {
@@ -21,9 +21,8 @@ sub new {
     my $options = shift;
 
     return bless ({
-        home => $options->{home} // "~/.emacs.d/ac-html/",
         parser => CSS::Watcher::Parser->new(),
-    }, $class)
+    }, $class);
 }
 
 sub update {
@@ -33,6 +32,9 @@ sub update {
     # check what is the monobj. file? dir?
     if (-f $obj || -d $obj) {
         my $proj_dir = $self->get_project_dir ($obj);
+        return unless (defined $proj_dir);
+
+        INFO "Update project: $proj_dir";
 
         my $prj = $self->_get_project ($proj_dir);
 
@@ -42,6 +44,7 @@ sub update {
             sub {
                 my $file = shift;
                 if ($file =~ m/.css$/) {
+                    INFO " (Re)parse css: $file";
                     $changes++;
                     my $data = read_file ($file);
                     my ($classes, $ids) = $self->{parser}->parse_css ($data);
@@ -68,9 +71,12 @@ sub update {
                     }
                 }
             }
+            INFO "Total classes: " . scalar (keys %classes) . ", ids: " . scalar (keys %classes);
             return ($proj_dir, \%classes, \%ids);
         }
+        return $proj_dir;
     }
+    return;
 }
 
 sub _get_project {
@@ -89,7 +95,7 @@ sub _get_project {
 sub get_project_dir {
     my $self = shift;
     my $obj = shift;
-
+    
     my $pdir = ! defined ($obj) ? undef:
                (-f $obj) ? dirname ($obj) :
                (-d $obj) ? $obj : undef;
@@ -102,6 +108,7 @@ sub get_project_dir {
             return $pdir;
         }
     }
+    return if (dirname($pdir) eq $pdir);
     #parent dir
     return $self->get_project_dir (dirname($pdir));
 }

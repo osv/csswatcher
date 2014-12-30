@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use Carp;
+use Log::Log4perl qw(:easy);
 use File::Spec;
 use Fcntl ':mode';
 
@@ -98,7 +99,7 @@ sub _read_dir {
   my $self = shift;
   my $dir  = shift;
 
-  opendir( my $dh, $dir ) or die "Can't read $dir ($!)";
+  opendir( my $dh, $dir ) or LOGDIE "Can't read $dir ($!)";
   my @files = map { File::Spec->catfile( $dir, $_ ) }
    sort
    grep { $_ !~ /^[.]{1,2}$/ } readdir( $dh );

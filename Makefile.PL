@@ -10,6 +10,8 @@ WriteMakefile(
     PREREQ_PM => {
         'Carp'              => '0',
         'CSS::Selector::Parser ' => '0',
+        'Log::Log4perl' => 0,
+        'File::Slurp' => 0,
         'File::Copy::Recursive' => '0.38',
         'File::Spec' => 0,
         'File::Path' => 0,

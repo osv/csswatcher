@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use Carp;
+use Log::Log4perl qw(:easy);
 use CSS::Selector::Parser qw/parse_selector/;
 
 my $nested;                     # regexp for "{ }"
@@ -71,6 +72,7 @@ sub _parse_css {
         };
         if ($@) {
             # log selector parse failure
+            ERROR "Can't parse selector: \"$selector\"";
         }
     }
 }

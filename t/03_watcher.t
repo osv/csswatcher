@@ -16,7 +16,7 @@ subtest "Projectile dir" => sub {
 
 my $home_dir = File::Spec->rel2abs('t/monitoring/ac-html/');
 
-my $watcher = CSS::Watcher->new({home => $home_dir});
+my $watcher = CSS::Watcher->new();
 
 rmtree "t/monitoring/";
 mkpath "t/monitoring/";
