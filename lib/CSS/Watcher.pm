@@ -15,6 +15,7 @@ use File::Slurp qw/read_file write_file/;
 use CSS::Watcher::Parser;
 use CSS::Watcher::Monitor;
 
+our $VERSION = '0.1'; # Don't forget to set version and release date in POD!
 
 sub new {
     my $class= shift;
@@ -125,23 +126,14 @@ CSS::Watcher - class, id completion for ac-html
 
    use CSS::Watcher;
    my $cw = CSS::Watcher->new ();
+   my ($project_dir, $classes, $ids) = $cs->update('~/work/css/');
+   if (!defined $project_dir) {
+      print "oops, there no css files "
+   }
 
 =head1 DESCRIPTION
 
 Watch for changes in css files, parse them and populate ac-html completion.
-
-Blah blah blah.
-
-=head2 EXPORT
-
-None by default.
-
-=head1 SEE ALSO
-
-Mention other useful documentation such as the documentation of
-related modules or operating system documentation (such as man pages
-in UNIX), or any relevant external documentation such as RFCs or
-standards.
 
 =head1 AUTHOR
 

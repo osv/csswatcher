@@ -113,7 +113,7 @@ sub _read_dir {
 
 =head1 NAME
 
-CSS::Watcher::Monitor - Monitor for file hchanges
+CSS::Watcher::Monitor - Monitor files for changes.
 
 =head1 SYNOPSIS
 
@@ -130,13 +130,7 @@ CSS::Watcher::Monitor - Monitor for file hchanges
 
 =head1 DESCRIPTION
 
-Watch for changes in css files, parse them and populate ac-html completion.
-
-Blah blah blah.
-
-=head2 EXPORT
-
-None by default.
+Watch for changes, call callback sub.
 
 =head1 SEE ALSO
 

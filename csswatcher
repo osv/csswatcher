@@ -124,7 +124,6 @@ if (!defined $client) {
                 if (defined $project_dir) {
                     print $clientsocket "PROJECT: $project_dir\n";
                     print "PROJECT: $project_dir\n";
-                    print Dumper \$classes;
                 }
             }
         }
