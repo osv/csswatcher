@@ -1,9 +1,8 @@
 #!/usr/bin/perl -I..lib -Ilib
 use strict;
 use Test::More tests => 3;
-use File::Path qw/mkpath rmtree/;
-use File::Spec;
 use File::Copy::Recursive qw(dircopy);
+use Path::Tiny;
 
 BEGIN { use_ok("CSS::Watcher::Monitor"); }
 my $home = "t/tmp/ac-html/";
@@ -28,14 +27,16 @@ subtest "new()" => sub {
 
 subtest "Scan files" => sub {
 
-    rmtree "t/monitoring/";
-    mkpath "t/monitoring/";
+    path ("t/monitoring/")->remove_tree({save => 0});
+    path ("t/monitoring/")->mkpath;
+
     dircopy "t/fixtures/prj1/", "t/monitoring/prj1";
 
     my $mon = CSS::Watcher::Monitor->new({dir => 't/monitoring/prj1/'});
     my @expect_files = qw(t/monitoring/prj1/.watcher
                           t/monitoring/prj1/css/index.html
                           t/monitoring/prj1/css/simple.css
+                          t/monitoring/prj1/css/override.css
                      );
     my $file_clount = scalar (@expect_files);
     $mon->scan(sub {

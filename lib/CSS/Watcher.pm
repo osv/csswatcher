@@ -6,11 +6,9 @@ use warnings;
 use Carp;
 use Data::Dumper;
 
-use File::Basename qw/dirname basename/;
-use File::Spec;
-use File::Path qw/mkpath rmtree/;
 use Log::Log4perl qw(:easy);
 use File::Slurp qw/read_file write_file/;
+use Path::Tiny;
 
 use CSS::Watcher::Parser;
 use CSS::Watcher::Monitor;
@@ -61,14 +59,14 @@ sub update {
             while ( my ( $file, $completions ) = each %{$prj->{parsed}} ) {
                 while ( my ( $tag, $classes ) = each %{$completions->{CLASSES}} ) {
                     foreach (@{$classes}) {
-                        $classes{$tag}{$_} .= 'Defined in ' . File::Spec->abs2rel ($file, $proj_dir) . '\n';
+                        $classes{$tag}{$_} .= 'Defined in ' . path( $file )->relative( $proj_dir ) . '\n';
                     }
                 }
             }
             while ( my ( $file, $completions ) = each %{$prj->{parsed}} ) {
                 while ( my ( $tag, $ids ) = each %{$completions->{IDS}} ) {
                     foreach (@{$ids}) {
-                        $ids{$tag}{$_} .= 'Defined in ' . File::Spec->abs2rel ($file, $proj_dir) . '\n';
+                        $ids{$tag}{$_} .= 'Defined in ' . path( $file )->relative( $proj_dir ) . '\n';
                     }
                 }
             }
@@ -98,20 +96,20 @@ sub get_project_dir {
     my $obj = shift;
     
     my $pdir = ! defined ($obj) ? undef:
-               (-f $obj) ? dirname ($obj) :
+               (-f $obj) ? path ($obj)->parent :
                (-d $obj) ? $obj : undef;
     return unless (defined $pdir);
 
-    $pdir = File::Spec->rel2abs($pdir);
+    $pdir = path( $pdir );
 
     foreach (qw/.projectile .watcher .git .hg .fslckout .bzr _darcs/) {
-        if (-e File::Spec->catfile($pdir, $_)) {
+        if (-e ($pdir->child( $_ ))) {
             return $pdir;
         }
     }
-    return if (dirname($pdir) eq $pdir);
+    return if ($pdir->is_rootdir());
     #parent dir
-    return $self->get_project_dir (dirname($pdir));
+    return $self->get_project_dir ($pdir->parent);
 }
 
 1;

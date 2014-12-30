@@ -2,24 +2,21 @@
 use strict;
 use Test::More tests => 3;
 use File::Copy::Recursive qw(dircopy);
-use File::Path qw/mkpath rmtree/;
-use File::Spec;
+use Path::Tiny;
 use Digest::MD5 qw/md5_hex/;
 
 BEGIN { use_ok("CSS::Watcher"); }
 
 subtest "Projectile dir" => sub {
     is (CSS::Watcher->get_project_dir("t/fixtures/prj1/css/simple.css"),
-        File::Spec->rel2abs("t/fixtures/prj1"),
+        path("t/fixtures/prj1"),
         "Search for \".watcher\" file");
 };
 
-my $home_dir = File::Spec->rel2abs('t/monitoring/ac-html/');
-
 my $watcher = CSS::Watcher->new();
 
-rmtree "t/monitoring/";
-mkpath "t/monitoring/";
+path ("t/monitoring/")->remove_tree({save => 0});
+path ("t/monitoring/")->mkpath;
 dircopy "t/fixtures/prj1/", "t/monitoring/prj1";
 
 subtest "Dirs of projects" => sub {
@@ -27,7 +24,7 @@ subtest "Dirs of projects" => sub {
         "\$watcher->update return undef if bad project path");
 
     my ($project_dir, $classes, $ids) = $watcher->update("t/monitoring/prj1/css");
-    is ($project_dir, File::Spec->rel2abs('t/monitoring/prj1/'), 'Check project directory');
+    is ($project_dir, path('t/monitoring/prj1/'), 'Check project directory');
     ok ($classes->{global}{container} =~ m/override\.css/, ".container must be present in override.css");
     ok ($classes->{global}{container} =~ m/simple\.css/, ".container must be present in simple.css");
     ok ($ids->{global}{myid} =~ m/simple\.css/, "#myid must be present in simple.css");

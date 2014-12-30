@@ -5,19 +5,19 @@ use warnings;
 use strict;
 
 use Getopt::Long;
-use FindBin;
-use File::Spec;
 use File::Slurp qw/read_file write_file/;
-use File::Path qw/mkpath rmtree/;
-use File::Basename;
+use Path::Tiny;
 use IO::Socket::INET;
 use Log::Log4perl qw(:easy);
+use Digest::MD5 qw/md5_hex/;
 
 use CSS::Watcher;
 
 use constant AC_HTML_ATTRIBUTES          => 'html-attributes-list';
 use constant SOCKET_FILE => '~/.emacs.d/ac-html-csswatcher/csswatcher.socket';
 use constant LOG_FILE => '~/.emacs.d/ac-html-csswatcher/csswatcher.log';
+use constant PID_FILE => '~/.emacs.d/ac-html-csswatcher/csswatcher.pid';
+use constant HTML_STUFF => '~/.emacs.d/ac-html-csswatcher/completion/';
 
 sub usage {
 
@@ -39,23 +39,38 @@ Monitor project and create completion for ac-html
     OBJECT......Directory or file, this script will find project home like projectile
     socket......Socket file, default
                 @{[SOCKET_FILE]}
-    logfile.....Set log file for daemon, default
+    logfile.....Only for daemon. Set log file for daemon, default
                 @{[LOG_FILE]}
+    outputdir...Only for daemon. Output root directory where place generated files for ac-html
+                @{[HTML_STUFF]}
+    pidfile.....Only for daemon. PID file for daemon, default
+                @{[PID_FILE]}
+    debug_level.Only for daemon. Debug level, default INFO. You can set
+                OFF FATAL ERROR WARN INFO DEBUG TRACE ALL.
+
 See also https://github.com/cheunghy/ac-html
 EOT
 }
 
 my $socket_file = SOCKET_FILE;
 my $log_file = LOG_FILE;
+my $html_stuff_dir = HTML_STUFF;
+my $pid_file = PID_FILE;
 my $help = 0;
+my $debug_level = 'INFO';
 
 GetOptions ( "socket=s" => \$socket_file,
              'logfile=i' => \$log_file,
+             'outputdir=s' => \$html_stuff_dir,
+             'debug=s' => \$debug_level,
+             'pid=s' => \$pid_file,
              "help|?"  => \$help);
 
 
-$socket_file = File::Spec->rel2abs($socket_file);
-$log_file = File::Spec->rel2abs($log_file);
+$socket_file = path( $socket_file );
+$log_file = path( $log_file );
+$html_stuff_dir = path( $html_stuff_dir );
+$pid_file = path( $pid_file );
 
 my $file = $ARGV[0];
 
@@ -78,8 +93,9 @@ if (!defined $client) {
 
     if (!$pid) {
         # start server
-        mkpath dirname($socket_file);
-        mkpath dirname($log_file);
+        path($socket_file)->touchpath;
+        path($log_file)->touchpath;
+        path($pid_file)->touchpath;
         unlink $log_file;
 
         my $conf = qq(
@@ -90,9 +106,8 @@ if (!defined $client) {
     log4perl.appender.Logfile.layout.ConversionPattern = [\%d{HH:mm:ss}] \%-20c{2} \%m\%n
 
   );
-        print $conf;
         Log::Log4perl::init( \$conf );
-
+ 
         unlink $socket_file;
 
         my $server = IO::Socket::UNIX->new(
@@ -112,25 +127,43 @@ if (!defined $client) {
         while (1) {
             my $clientsocket = $server->accept();
 
-            print " **** New Client Connected ****\n";
+            DEBUG " **** New Client Connected ****";
 
             # read the data from the client
             my $task = <$clientsocket>;
-            if (my ($watchobj) = $task =~/WATCH:(.+)/) {
-
-                print "recieve job: \"$watchobj\"\n";
+            # "WATCH: " command
+            if (my ($watchobj) = $task =~/WATCH: (.+)/) {
 
                 my ($project_dir, $classes, $ids) = $watcher->update ($watchobj);
                 if (defined $project_dir) {
+                    my $ac_html_stuff_dir = path ($html_stuff_dir)->child (md5_hex( ''.$project_dir ));
+                    my $attrib_dir = path ($ac_html_stuff_dir)->child ('html-attributes-complete');
+
+                    $attrib_dir->remove_tree({save => 0});
+                    $attrib_dir->mkpath;
+
+                    while ( my ( $tag, $class ) = each %{$classes} ) {
+                        my $fname = File::Spec->catfile ($attrib_dir, $tag . '-class');
+                        DEBUG "Write $fname";
+                        write_file ($fname, map {
+                            $_ . ' ' . $class->{$_} } keys %{$class});
+                    }
+                    while ( my ( $tag, $id ) = each %${ids} ) {
+                        my $fname = File::Spec->catfile ($attrib_dir, $tag . '-id');
+                        DEBUG "Write $fname";
+                        write_file ($fname, map {
+                            $_ . ' ' . $id->{$_} } keys %{$id});
+                    }
+                    DEBUG "Done writing. Reply to client.";
                     print $clientsocket "PROJECT: $project_dir\n";
-                    print "PROJECT: $project_dir\n";
+                    print $clientsocket "ACSOURCE: $ac_html_stuff_dir\n";
                 }
             }
         }
         $server->close();
         exit;
     }
-    sleep 2;
+    sleep 2;                    # Wait few for daemon start well
     $client = IO::Socket::UNIX->new(
         Type => SOCK_STREAM(),
         Peer => $socket_file,
@@ -139,8 +172,7 @@ if (!defined $client) {
 }
 
 # good, we connect to daemon, send job and print returned
-print "Connected\n";
-print $client "WATCH:$file\n";
+print $client "WATCH: $file\n";
 my $response = <$client>;
 if (defined $response) {
     print "$response\n";

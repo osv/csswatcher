@@ -12,9 +12,7 @@ WriteMakefile(
         'CSS::Selector::Parser ' => '0',
         'Log::Log4perl' => 0,
         'File::Slurp' => 0,
+        'Path::Tiny'  => 0,
         'File::Copy::Recursive' => '0.38',
-        'File::Spec' => 0,
-        'File::Path' => 0,
-        'File::Basename' => 0,
         },
 );
