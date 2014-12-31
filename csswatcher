@@ -9,7 +9,6 @@ use File::Slurp qw/read_file write_file/;
 use Path::Tiny;
 use IO::Socket::INET;
 use Log::Log4perl qw(:easy);
-use Digest::MD5 qw/md5_hex/;
 use PID::File;
 
 use CSS::Watcher;
@@ -18,7 +17,7 @@ use constant AC_HTML_ATTRIBUTES            => 'html-attributes-list';
 use constant SOCKET_FILE                   => '~/.emacs.d/ac-html-csswatcher/csswatcher.socket';
 use constant LOG_FILE                      => '~/.emacs.d/ac-html-csswatcher/csswatcher.log';
 use constant PID_FILE                      => '~/.emacs.d/ac-html-csswatcher/csswatcher.pid';
-use constant HTML_STUFF                    => '~/.emacs.d/ac-html-csswatcher/completion/';
+use constant HTML_STUFF                    => CSS::Watcher::DEFAULT_HTML_STUFF_DIR;
 
 sub usage {
 
@@ -138,7 +137,7 @@ if (!defined $probe || $restart) {
 
         LOGDIE "Can't create socket for server" unless defined $server;
 
-        my $watcher = CSS::Watcher->new;
+        my $watcher = CSS::Watcher->new({outputdir => $html_stuff_dir});
 
         DEBUG "Ready for connections";
 
@@ -152,28 +151,8 @@ if (!defined $probe || $restart) {
 
             # "WATCH: " command
             if (my ($watchobj) = $task =~/WATCH: (.+)/) {
-
-                my ($project_dir, $classes, $ids) = $watcher->update ($watchobj);
+                my ($project_dir, $ac_html_stuff_dir) = $watcher->get_html_stuff ($watchobj);
                 if (defined $project_dir) {
-                    my $ac_html_stuff_dir = path ($html_stuff_dir)->child (md5_hex( ''.$project_dir ));
-                    my $attrib_dir = path ($ac_html_stuff_dir)->child ('html-attributes-complete');
-
-                    $attrib_dir->remove_tree({save => 0});
-                    $attrib_dir->mkpath;
-
-                    while ( my ( $tag, $class ) = each %{$classes} ) {
-                        my $fname = File::Spec->catfile ($attrib_dir, $tag . '-class');
-                        DEBUG "Write $fname";
-                        write_file ($fname, map {
-                            $_ . ' ' . $class->{$_} } keys %{$class});
-                    }
-                    while ( my ( $tag, $id ) = each %${ids} ) {
-                        my $fname = File::Spec->catfile ($attrib_dir, $tag . '-id');
-                        DEBUG "Write $fname";
-                        write_file ($fname, map {
-                            $_ . ' ' . $id->{$_} } keys %{$id});
-                    }
-                    DEBUG "Done writing. Reply to client.";
                     print $clientsocket "PROJECT: $project_dir\n";
                     print $clientsocket "ACSOURCE: $ac_html_stuff_dir\n";
                 }
@@ -185,6 +164,8 @@ if (!defined $probe || $restart) {
     }
     sleep 2;                    # Wait few for daemon start well
 }
+
+$probe->close() if (defined $probe);
 
 # good, we connect to daemon, send job and print returned
 
@@ -198,9 +179,8 @@ if (($file // '') ne '') {
         unless defined $client;
 
     print $client "WATCH: $file\n";
-    my $response = <$client>;
-    if (defined $response) {
-        print "$response\n";
+    while (my $response = <$client>) {
+        print "$response";
     }
 }
 

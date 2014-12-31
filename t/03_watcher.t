@@ -1,35 +1,77 @@
 #!/usr/bin/perl -I..lib -Ilib
 use strict;
-use Test::More tests => 3;
+use Test::More tests => 5;
 use File::Copy::Recursive qw(dircopy);
 use Path::Tiny;
 use Digest::MD5 qw/md5_hex/;
 
 BEGIN { use_ok("CSS::Watcher"); }
 
+use constant TEST_HTML_STUFF_DIR => 't/monitoring/stuff/';
+
 subtest "Projectile dir" => sub {
     is (CSS::Watcher->get_project_dir("t/fixtures/prj1/css/simple.css"),
         path("t/fixtures/prj1"),
         "Search for \".watcher\" file");
+    is (CSS::Watcher->get_project_dir("t/fixtures/prj1/"),
+        path("t/fixtures/prj1"),
+        "Search for \".watcher\" file");
 };
 
-my $watcher = CSS::Watcher->new();
+subtest "Default output directory" => sub {
+    my $watcher = CSS::Watcher->new();
+    is ($watcher->{outputdir}, CSS::Watcher::DEFAULT_HTML_STUFF_DIR, 'Default output directory');
+};
 
-path ("t/monitoring/")->remove_tree({save => 0});
-path ("t/monitoring/")->mkpath;
-dircopy "t/fixtures/prj1/", "t/monitoring/prj1";
+subtest "Generate classes and ids" => sub {
 
-subtest "Dirs of projects" => sub {
+    path ("t/monitoring/")->remove_tree({save => 0});
+    path ("t/monitoring/")->mkpath;
+    dircopy "t/fixtures/prj1/", "t/monitoring/prj1";
+
+    my $watcher = CSS::Watcher->new({'outputdir' => TEST_HTML_STUFF_DIR});
+
     is ($watcher->update("t/monitoring/NOPROJECT/css"), undef,
         "\$watcher->update return undef if bad project path");
 
-    my ($project_dir, $classes, $ids) = $watcher->update("t/monitoring/prj1/css");
-    is ($project_dir, path('t/monitoring/prj1/'), 'Check project directory');
-    ok ($classes->{global}{container} =~ m/override\.css/, ".container must be present in override.css");
-    ok ($classes->{global}{container} =~ m/simple\.css/, ".container must be present in simple.css");
-    ok ($ids->{global}{myid} =~ m/simple\.css/, "#myid must be present in simple.css");
+    my ($changes, $project_dir) = $watcher->update("t/monitoring/prj1/css");
+
+    is ($project_dir, path("t/monitoring/prj1"),
+        "Search for \".watcher\" file");
+
+    is ($changes, 2, 'Must be 2 css files');
+
+    my ($classes, $ids) = $watcher->project_stuff ($project_dir);
+
+    ok ($classes->{global}{container} =~ m| css/override\.css|, ".container must be present in override.css");
+    ok ($classes->{global}{container} =~ m| css/simple\.css|, ".container must be present in simple.css");
+    ok ($ids->{global}{myid} =~ m| css/simple\.css|, "#myid must be present in simple.css");
+
+    subtest "Generate html-stuff data" => sub {
+        my $result_dir = $watcher->build_ac_html_stuff ($project_dir);
+        is (index ($result_dir, TEST_HTML_STUFF_DIR), 0, "Good stuff dir \"@{[TEST_HTML_STUFF_DIR]}\"");
+        ok (-f path($result_dir)->child('html-attributes-complete/global-class'), 'file exists global-class');
+        ok (-f path($result_dir)->child('html-attributes-complete/p-class'), 'file exists p-class');
+        ok (-f path($result_dir)->child('html-attributes-complete/global-id'), 'file exists global-id');
+
+    };
 };
 
+subtest "sub get_html_stuff" => sub {
 
+    path ("t/monitoring/")->remove_tree({save => 0});
+    path ("t/monitoring/")->mkpath;
+    dircopy "t/fixtures/prj1/", "t/monitoring/prj1";
 
+    my $watcher = CSS::Watcher->new({'outputdir' => TEST_HTML_STUFF_DIR});
 
+    is ($watcher->get_html_stuff("t/monitoring/NOPROJECT/css"), undef,
+        "\$watcher->get_html_stuff return undef if bad project path");
+
+    my ($project_dir, $result_dir) = $watcher->get_html_stuff("t/monitoring/prj1/css");
+
+    is (index ($result_dir, TEST_HTML_STUFF_DIR), 0, "Good stuff dir \"@{[TEST_HTML_STUFF_DIR]}\"");
+    ok (-f path($result_dir)->child('html-attributes-complete/global-class'), 'file exists global-class');
+    ok (-f path($result_dir)->child('html-attributes-complete/p-class'), 'file exists p-class');
+    ok (-f path($result_dir)->child('html-attributes-complete/global-id'), 'file exists global-id');
+};
