@@ -86,14 +86,14 @@ if ($help) {
 }
 
 # try connect to daemon
-my $client = IO::Socket::UNIX->new(
+my $probe = IO::Socket::UNIX->new(
      Type => SOCK_STREAM(),
      Peer => $socket_file,
 );
 
 # looks daemon not running, fork server
 # when --reload param.
-if (!defined $client || $restart) {
+if (!defined $probe || $restart) {
 
     my $pid = fork();
     defined($pid) || die "Fork failed: $!";
@@ -145,11 +145,10 @@ if (!defined $client || $restart) {
         while (1) {
             my $clientsocket = $server->accept();
 
-            INFO " **** New Client Connected ****";
-
             # read the data from the client
             my $task = <$clientsocket>;
             next unless defined $task;
+            INFO " **** New Client Connected ****";
 
             # "WATCH: " command
             if (my ($watchobj) = $task =~/WATCH: (.+)/) {
@@ -190,17 +189,14 @@ if (!defined $client || $restart) {
 # good, we connect to daemon, send job and print returned
 
 if (($file // '') ne '') {
-    # retry connect
-    $client = IO::Socket::UNIX->new(
+    my $client = IO::Socket::UNIX->new(
         Type => SOCK_STREAM(),
         Peer => $socket_file,
-    ) 
-        unless defined $client;
+    );
+
     die "Can't create socket for client"
         unless defined $client;
 
-    print "connecting...\n";
-    
     print $client "WATCH: $file\n";
     my $response = <$client>;
     if (defined $response) {
