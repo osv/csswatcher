@@ -125,7 +125,7 @@ if (!defined $client || $restart) {
     log4perl.appender.Logfile          = Log::Log4perl::Appender::File
     log4perl.appender.Logfile.filename = $log_file
     log4perl.appender.Logfile.layout   = Log::Log4perl::Layout::PatternLayout
-    log4perl.appender.Logfile.layout.ConversionPattern = [\%d{HH:mm:ss}] \%-20c{2} \%m\%n
+    log4perl.appender.Logfile.layout.ConversionPattern = [\%d{HH:mm:ss}] %p{1} \%-20c{2} \%m\%n
 
   );
         Log::Log4perl::init( \$conf );
@@ -145,7 +145,7 @@ if (!defined $client || $restart) {
         while (1) {
             my $clientsocket = $server->accept();
 
-            DEBUG " **** New Client Connected ****";
+            INFO " **** New Client Connected ****";
 
             # read the data from the client
             my $task = <$clientsocket>;
