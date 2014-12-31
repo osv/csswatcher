@@ -68,10 +68,12 @@ sub project_stuff {
 
     # build unique tag - class,id
     my (%classes, %ids);
+    my ($total_classes, $total_ids) = (0, 0);
     while ( my ( $file, $completions ) = each %{$prj->{parsed}} ) {
         while ( my ( $tag, $classes ) = each %{$completions->{CLASSES}} ) {
             foreach (keys %{$classes}) {
                 $classes{$tag}{$_} .= 'Defined in ' . path( $file )->relative( $proj_dir ) . '\n';
+                $total_classes++;
             }
         }
     }
@@ -79,11 +81,13 @@ sub project_stuff {
         while ( my ( $tag, $ids ) = each %{$completions->{IDS}} ) {
             foreach (keys %{$ids}) {
                 $ids{$tag}{$_} .= 'Defined in ' . path( $file )->relative( $proj_dir ) . '\n';
+                $total_ids++;
             }
         }
     }
     INFO "Total for $proj_dir:";
-    INFO " Classes: " . scalar (keys %classes) . ", ids: " . scalar (keys %classes);
+    INFO " Classes: $total_classes, ids: $total_ids";
+
     return (\%classes, \%ids);
 }
 
@@ -122,12 +126,15 @@ sub get_html_stuff {
     my ($changes, $project_dir) = $self->update ($obj);
     return unless defined $changes;
 
+    my $prj = $self->_get_project ($project_dir);
+
     my $ac_html_stuff_dir;
 
-    if (defined $changes) {
+    if ($changes) {
         $ac_html_stuff_dir = $self->build_ac_html_stuff ($project_dir);
-        my $prj = $self->_get_project ($project_dir);
-        $prj->{ac_html_stuff} = $ac_html_stuff_dir;
+        $prj->{'ac_html_stuff'} = $ac_html_stuff_dir;
+    } else {
+        $ac_html_stuff_dir = $prj->{'ac_html_stuff'};
     }
     return ($project_dir, $ac_html_stuff_dir);
 }
