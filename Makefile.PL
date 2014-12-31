@@ -2,7 +2,7 @@ use strict;
 use ExtUtils::MakeMaker;
 
 WriteMakefile(
-    NAME => "CSS Watcher",
+    NAME => "CSS_Watcher",
     VERSION_FROM => "lib/CSS/Watcher.pm",
     AUTHOR => 'Olexandr Sydorchuk',
     EXE_FILES => [ 'csswatcher' ],
