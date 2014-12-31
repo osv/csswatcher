@@ -1,5 +1,42 @@
 #!/usr/bin/perl -w -Ilib
 
+=head1 NAME
+
+csswatcher - daemon/client for scanning css files and build ac-html completion.
+
+=head1 DESCRIPTION
+
+CSS completion generator for emacs ac-html.el.
+
+=head1 USAGE
+
+=head2 Run as daemon
+
+   % csswatcher
+
+=head2 Build completions for your project.
+
+The concept of a project is pretty basic - just a folder containing
+special file.  Currently git, mercurial and bazaar repos are
+considered projects by default.  If you want to mark a folder
+manually as a project just create an empty .projectile or .csswatcher
+file in it.
+
+
+   % touch      ~/work/bootstrap/dist/.csswatcher
+   % csswatcher ~/work/bootstrap/dist/css/
+   PROJECT: ~/work/bootstrap/dist/
+   ACSOURCE: ~/.emacs.d/ac-html-csswatcher/completion/9ba471294f1c47ce596177c978b79c95
+
+=head1 SEE ALSO
+
+See also https://github.com/cheunghy/ac-html
+
+=head1 AUTHOR
+
+Olexandr Sydorchuk (olexandr.syd@gmail.com)
+
+=cut
 
 use warnings;
 use strict;
