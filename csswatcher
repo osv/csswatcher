@@ -80,7 +80,7 @@ $pid_file = path( $pid_file );
 
 my $file = $ARGV[0];
 
-if ($help) {
+if ($help || (!$restart && ($file // '') eq '')) {
     usage();
     exit(0);
 }
