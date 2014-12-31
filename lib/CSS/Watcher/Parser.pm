@@ -39,7 +39,7 @@ sub _parse_css {
     my $self = shift;
     my ($source, $classes, $ids) = @_;
 
-    $source =~s|/\*.*?\*/||g;      # remove comments
+    $source =~s|/\*.*?\*/||gs;      # remove comments
 
     while ($source =~ m/(.*?)($nested)/gs) {
         my ($selector, $selector_body) = ($1, $2);
