@@ -10,14 +10,15 @@ use Path::Tiny;
 use IO::Socket::INET;
 use Log::Log4perl qw(:easy);
 use Digest::MD5 qw/md5_hex/;
+use PID::File;
 
 use CSS::Watcher;
 
-use constant AC_HTML_ATTRIBUTES          => 'html-attributes-list';
-use constant SOCKET_FILE => '~/.emacs.d/ac-html-csswatcher/csswatcher.socket';
-use constant LOG_FILE => '~/.emacs.d/ac-html-csswatcher/csswatcher.log';
-use constant PID_FILE => '~/.emacs.d/ac-html-csswatcher/csswatcher.pid';
-use constant HTML_STUFF => '~/.emacs.d/ac-html-csswatcher/completion/';
+use constant AC_HTML_ATTRIBUTES            => 'html-attributes-list';
+use constant SOCKET_FILE                   => '~/.emacs.d/ac-html-csswatcher/csswatcher.socket';
+use constant LOG_FILE                      => '~/.emacs.d/ac-html-csswatcher/csswatcher.log';
+use constant PID_FILE                      => '~/.emacs.d/ac-html-csswatcher/csswatcher.pid';
+use constant HTML_STUFF                    => '~/.emacs.d/ac-html-csswatcher/completion/';
 
 sub usage {
 
@@ -39,13 +40,16 @@ Monitor project and create completion for ac-html
     OBJECT......Directory or file, this script will find project home like projectile
     socket......Socket file, default
                 @{[SOCKET_FILE]}
-    logfile.....Only for daemon. Set log file for daemon, default
+    restart.....Restart daemon
+
+Daemon options:
+    logfile.....Set log file for daemon, default
                 @{[LOG_FILE]}
-    outputdir...Only for daemon. Output root directory where place generated files for ac-html
+    outputdir...Output root directory where place generated files for ac-html
                 @{[HTML_STUFF]}
-    pidfile.....Only for daemon. PID file for daemon, default
+    pidfile.....PID file for daemon, default
                 @{[PID_FILE]}
-    debug_level.Only for daemon. Debug level, default INFO. You can set
+    debug.......Debug level, default INFO. You can set
                 OFF FATAL ERROR WARN INFO DEBUG TRACE ALL.
 
 See also https://github.com/cheunghy/ac-html
@@ -58,12 +62,14 @@ my $html_stuff_dir = HTML_STUFF;
 my $pid_file = PID_FILE;
 my $help = 0;
 my $debug_level = 'INFO';
+my $restart = 0;
 
 GetOptions ( "socket=s" => \$socket_file,
              'logfile=i' => \$log_file,
              'outputdir=s' => \$html_stuff_dir,
              'debug=s' => \$debug_level,
              'pid=s' => \$pid_file,
+             'restart' => \$restart,
              "help|?"  => \$help);
 
 
@@ -74,7 +80,7 @@ $pid_file = path( $pid_file );
 
 my $file = $ARGV[0];
 
-if ($help || ($file // '') eq '') {
+if ($help) {
     usage();
     exit(0);
 }
@@ -86,20 +92,36 @@ my $client = IO::Socket::UNIX->new(
 );
 
 # looks daemon not running, fork server
-if (!defined $client) {
+# when --reload param.
+if (!defined $client || $restart) {
 
     my $pid = fork();
     defined($pid) || die "Fork failed: $!";
 
     if (!$pid) {
+
+        $socket_file->parent->mkpath;
+        $log_file->parent->mkpath;
+        $pid_file->parent->mkpath;
+
+        # kill old daemon
+        my $pid = PID::File->new(file => $pid_file);
+        if ($pid->running) {
+            kill "TERM", $pid->pid;
+        }
+
         # start server
-        path($socket_file)->touchpath;
-        path($log_file)->touchpath;
-        path($pid_file)->touchpath;
         unlink $log_file;
+        unlink $socket_file;
+        unlink $pid_file;
+
+        die "can't create pid file"
+            if ! $pid->create;
+        $pid->guard;
+
 
         my $conf = qq(
-    log4perl.rootLogger=INFO, Logfile
+    log4perl.rootLogger=$debug_level, Logfile
     log4perl.appender.Logfile          = Log::Log4perl::Appender::File
     log4perl.appender.Logfile.filename = $log_file
     log4perl.appender.Logfile.layout   = Log::Log4perl::Layout::PatternLayout
@@ -107,8 +129,6 @@ if (!defined $client) {
 
   );
         Log::Log4perl::init( \$conf );
- 
-        unlink $socket_file;
 
         my $server = IO::Socket::UNIX->new(
             Type => SOCK_STREAM(),
@@ -118,11 +138,9 @@ if (!defined $client) {
 
         LOGDIE "Can't create socket for server" unless defined $server;
 
-        chdir("/") || LOGDIE "can't chdir to /: $!";
-        open(STDIN, "< /dev/null") || LOGDIE "can't read /dev/null: $!";
-        open(STDOUT, "> /dev/null") || LOGDIE "can't write to /dev/null: $!";
-
         my $watcher = CSS::Watcher->new;
+
+        DEBUG "Ready for connections";
 
         while (1) {
             my $clientsocket = $server->accept();
@@ -131,6 +149,8 @@ if (!defined $client) {
 
             # read the data from the client
             my $task = <$clientsocket>;
+            next unless defined $task;
+
             # "WATCH: " command
             if (my ($watchobj) = $task =~/WATCH: (.+)/) {
 
@@ -161,21 +181,31 @@ if (!defined $client) {
             }
         }
         $server->close();
+        DEBUG "Exiting";
         exit;
     }
     sleep 2;                    # Wait few for daemon start well
-    $client = IO::Socket::UNIX->new(
-        Type => SOCK_STREAM(),
-        Peer => $socket_file,
-    );
-    die "Can't create socket for client" unless defined $client;
 }
 
 # good, we connect to daemon, send job and print returned
-print $client "WATCH: $file\n";
-my $response = <$client>;
-if (defined $response) {
-    print "$response\n";
+
+if (($file // '') ne '') {
+    # retry connect
+    $client = IO::Socket::UNIX->new(
+        Type => SOCK_STREAM(),
+        Peer => $socket_file,
+    ) 
+        unless defined $client;
+    die "Can't create socket for client"
+        unless defined $client;
+
+    print "connecting...\n";
+    
+    print $client "WATCH: $file\n";
+    my $response = <$client>;
+    if (defined $response) {
+        print "$response\n";
+    }
 }
 
 
