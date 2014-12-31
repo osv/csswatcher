@@ -58,14 +58,14 @@ sub _parse_css {
                 next unless (ref $_ eq 'ARRAY');
                 foreach my $rule (@{$_}) {
                     if (exists $rule->{class}) {
-                        push (@{$classes->{
+                        $classes->{
                             exists ($rule->{element}) ? $rule->{element} : "global"
-                        }}, $rule->{class});
+                        }{ $rule->{class} }++;
                     }
                     if (exists $rule->{id}) {
-                        push (@{$ids->{
+                        $ids->{
                             exists ($rule->{element}) ? $rule->{element} : "global"
-                        }}, $rule->{id});
+                        }{ $rule->{id} }++;
                     }
                 } 
             }

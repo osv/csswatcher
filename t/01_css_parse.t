@@ -22,7 +22,7 @@ subtest "Simple css, class" => sub {
   zzz: xxx}
 CSS
         ;
-    my $expect = {"global" => ["class1"]};
+    my $expect = {"global" => {"class1" => 1}};
     is_deeply($classes, $expect, "class selector");
     
 };
@@ -32,7 +32,7 @@ subtest "Simple css, Ids" => sub {
 #id1 {foo: bar; zzz: xxx} */
 CSS
         ;
-    my $expect = {"global" => ["id1"]};
+    my $expect = {"global" => {"id1" => 1}};
     is_deeply($ids, $expect, "id selector");
     
 };
@@ -46,11 +46,11 @@ div.container {color: red}
 p#abc{color:green}a.small,.big{}
 CSS
         ;
-    my $expect_classes = {global => [qw/big/],
-                          div => [qw/container col/],
-                          a => [qw/small/]};
-    my $expect_ids = {global => ["abc"],
-                      p => ["abc"]};
+    my $expect_classes = {global => {big => 1},
+                          div => {container => 1, col => 1},
+                          a => {small => 1}};
+    my $expect_ids = {global => {abc => 1},
+                      p => {abc => 1}};
     is_deeply($classes, $expect_classes, "Classes list");
     is_deeply($ids, $expect_ids, "Ids list");
 };
@@ -66,21 +66,11 @@ p#abc{color:red}a.small,.big{}
 }
 CSS
         ;
-    my $expect_classes = {global => [qw/big/],
-                          div => [qw/container col/],
-                          a => [qw/small/]};
-    my $expect_ids = {global => ["abc"],
-                      p => ["abc"]};
+    my $expect_classes = {global => {big => 1},
+                          div => {container => 1, col => 1},
+                          a => {small => 1}};
+    my $expect_ids = {global => {abc => 1},
+                      p => {abc => 1}};
     is_deeply($classes, $expect_classes, "Classes list");
     is_deeply($ids, $expect_ids, "Ids list");
 }
-
-
-
-
-
-
-
-
-
-

@@ -70,14 +70,14 @@ sub project_stuff {
     my (%classes, %ids);
     while ( my ( $file, $completions ) = each %{$prj->{parsed}} ) {
         while ( my ( $tag, $classes ) = each %{$completions->{CLASSES}} ) {
-            foreach (@{$classes}) {
+            foreach (keys %{$classes}) {
                 $classes{$tag}{$_} .= 'Defined in ' . path( $file )->relative( $proj_dir ) . '\n';
             }
         }
     }
     while ( my ( $file, $completions ) = each %{$prj->{parsed}} ) {
         while ( my ( $tag, $ids ) = each %{$completions->{IDS}} ) {
-            foreach (@{$ids}) {
+            foreach (keys %{$ids}) {
                 $ids{$tag}{$_} .= 'Defined in ' . path( $file )->relative( $proj_dir ) . '\n';
             }
         }

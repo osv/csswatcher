@@ -45,7 +45,7 @@ subtest "Generate classes and ids" => sub {
 
     ok ($classes->{global}{container} =~ m| css/override\.css|, ".container must be present in override.css");
     ok ($classes->{global}{container} =~ m| css/simple\.css|, ".container must be present in simple.css");
-    ok ($ids->{global}{myid} =~ m| css/simple\.css|, "#myid must be present in simple.css");
+    is ($ids->{global}{myid}, 'Defined in css/simple.css\n', "#myid must be present in simple.css");
 
     subtest "Generate html-stuff data" => sub {
         my $result_dir = $watcher->build_ac_html_stuff ($project_dir);

@@ -33,7 +33,7 @@ subtest "Scan files" => sub {
     dircopy "t/fixtures/prj1/", "t/monitoring/prj1";
 
     my $mon = CSS::Watcher::Monitor->new({dir => 't/monitoring/prj1/'});
-    my @expect_files = qw(t/monitoring/prj1/.watcher
+    my @expect_files = qw(t/monitoring/prj1/.csswatcher
                           t/monitoring/prj1/css/index.html
                           t/monitoring/prj1/css/simple.css
                           t/monitoring/prj1/css/override.css
