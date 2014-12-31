@@ -102,7 +102,7 @@ sub get_project_dir {
 
     $pdir = path( $pdir );
 
-    foreach (qw/.projectile .watcher .git .hg .fslckout .bzr _darcs/) {
+    foreach (qw/.projectile .csswatcher .git .hg .fslckout .bzr _darcs/) {
         if (-e ($pdir->child( $_ ))) {
             return $pdir;
         }
