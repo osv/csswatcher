@@ -12,25 +12,47 @@ CSS completion generator for emacs ac-html.el.
 
 =head2 Run as daemon
 
-   % csswatcher
+   % csswatcher --daemon
+
+You don't need start in this way, because csswatcher automatically daemonize self.
+To stop manually:
+
+   % csswatcher --stop
 
 =head2 Build completions for your project.
 
-The concept of a project is pretty basic - just a folder containing
-special file.  Currently git, mercurial and bazaar repos are
-considered projects by default.  If you want to mark a folder
-manually as a project just create an empty .projectile or .csswatcher
-file in it.
+The concept of  a project is pretty basic like  projectile.el use it -
+just a folder  containing special file.  Currently  git, mercurial and
+bazaar repos are considered projects by  default.  If you want to mark
+a folder  manually as a  project just  create an empty  .projectile or
+.csswatcher file in it.
 
 
    % touch      ~/work/bootstrap/dist/.csswatcher
-   % csswatcher ~/work/bootstrap/dist/css/
+   % csswatcher ~/work/bootstrap/dist/css/bootstrap.min.css
    PROJECT: ~/work/bootstrap/dist/
    ACSOURCE: ~/.emacs.d/ac-html-csswatcher/completion/9ba471294f1c47ce596177c978b79c95
 
+Above example, show how to parse "~/work/bootstrap/" project directory.
+
+=over 2
+
+=item PROJECT
+
+Found project directory for object "~/work/bootstrap/dist/css/bootstrap.min.css"
+
+=item ACSOURCE
+
+Directory where completion sources located.
+
+=back
+
 =head1 SEE ALSO
 
-See also https://github.com/cheunghy/ac-html
+https://github.com/osv/ac-html-csswatcher
+
+https://github.com/cheunghy/ac-html
+
 
 =head1 AUTHOR
 
@@ -76,9 +98,11 @@ Monitor project and create completion for ac-html
     OBJECT......Directory or file, this script will find project home like projectile
     socket......Socket file, default
                 @{[SOCKET_FILE]}
-    restart.....Restart daemon
 
 Daemon options:
+    daemon......Start daemon (it automatically start if OBJECT defined).
+    restart.....Restart daemon
+    stop........Stop daemon
     logfile.....Set log file for daemon, default
                 @{[LOG_FILE]}
     outputdir...Output root directory where place generated files for ac-html
@@ -99,6 +123,8 @@ my $pid_file = PID_FILE;
 my $help = 0;
 my $debug_level = 'INFO';
 my $restart = 0;
+my $daemon = 0;
+my $stop = 0;
 
 GetOptions ( "socket=s" => \$socket_file,
              'logfile=i' => \$log_file,
@@ -106,6 +132,8 @@ GetOptions ( "socket=s" => \$socket_file,
              'debug=s' => \$debug_level,
              'pid=s' => \$pid_file,
              'restart' => \$restart,
+             'daemon' => \$daemon,
+             'stop' => \$stop,
              "help|?"  => \$help);
 
 
@@ -116,9 +144,18 @@ $pid_file = path( $pid_file );
 
 my $file = $ARGV[0];
 
-if ($help || (!$restart && ($file // '') eq '')) {
+if ($help || (!($restart || $daemon || $stop) && ($file // '') eq '')) {
     usage();
     exit(0);
+}
+
+if ($stop) {
+    my $pid = PID::File->new(file => $pid_file);
+    if ($pid->running) {
+        kill "TERM", $pid->pid;
+    }
+    unlink $pid_file;
+    exit
 }
 
 # try connect to daemon
