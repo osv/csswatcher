@@ -67,6 +67,7 @@ use Getopt::Long;
 use File::Slurp qw/read_file write_file/;
 use Path::Tiny;
 use IO::Socket::INET;
+use POSIX qw(setsid);
 use Log::Log4perl qw(:easy);
 use PID::File;
 
@@ -172,6 +173,7 @@ if (!defined $probe || $restart) {
     defined($pid) || die "Fork failed: $!";
 
     if (!$pid) {
+        setsid();               # Become session leader
 
         $socket_file->parent->mkpath;
         $log_file->parent->mkpath;
