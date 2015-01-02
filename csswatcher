@@ -27,6 +27,8 @@ bazaar repos are considered projects by  default.  If you want to mark
 a folder  manually as a  project just  create an empty  .projectile or
 .csswatcher file in it.
 
+I home you have no .git in root directory (or home ~/.git),
+because it may be occasion for full system scanning if you forgot setup project directory.
 
    % touch      ~/work/bootstrap/dist/.csswatcher
    % csswatcher ~/work/bootstrap/dist/css/bootstrap.min.css
@@ -44,6 +46,25 @@ Found project directory for object "~/work/bootstrap/dist/css/bootstrap.min.css"
 =item ACSOURCE
 
 Directory where completion sources located.
+
+=back
+
+=head1 File .csswatcher
+
+This file, as like .projectile, .git, etc, used to get project directory.
+But it olso may have some extra, example:
+
+    % cat .csswatcher
+    # ignore minified css files "min.css"
+    ignore: min\.css$
+    # ignore bootstrap css files
+    ignore: bootstrap.*css$
+
+=over 2
+
+=item IGNORE:
+
+Regexp for files that be ignored when scanning.
 
 =back
 

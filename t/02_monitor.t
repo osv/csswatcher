@@ -37,14 +37,15 @@ subtest "Scan files" => sub {
                           t/monitoring/prj1/css/index.html
                           t/monitoring/prj1/css/simple.css
                           t/monitoring/prj1/css/override.css
+                          t/monitoring/prj1/css/ignored.css
                      );
-    my $file_clount = scalar (@expect_files);
+    my $file_clount = 0;
     $mon->scan(sub {
                    my $file = shift;
-                   ok (grep (/${file}$/, @expect_files), "Unexpected file $file");
-                   $file_clount--;
+                   ok (grep (/${file}$/, @expect_files), "Check file present $file");
+                   $file_clount++;
                });
-    ok ($file_clount <= 0, 'There must be more or equeal to expected file count');
+    is ($file_clount, scalar (@expect_files), 'Expected file count');
 
     subtest "Create new file, check for changes" => sub {
         my $cssfile = "t/monitoring/prj1/css/new.css";
