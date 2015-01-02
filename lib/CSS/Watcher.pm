@@ -55,6 +55,7 @@ sub update {
                                              IDS => $ids};
                 }
             });
+        INFO "Update done.";
         return ($changes, $proj_dir);
     }
     return;
@@ -187,7 +188,7 @@ CSS::Watcher - class, id completion for ac-html
    my $cw = CSS::Watcher->new ();
 
    my ($project_dir, $ac_html_stuff_dir) = $cw->get_html_stuff ('~/work/css/');
-   if (!defined $project_dir) {
+   if (!defined $ac_html_stuff_dir) {
       print "oops, there no css files "
    }
 
