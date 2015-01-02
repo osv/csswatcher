@@ -1,6 +1,6 @@
 #!/usr/bin/perl -I..lib -Ilib
 use strict;
-use Test::More tests => 5;
+use Test::More tests => 6;
 use File::Copy::Recursive qw(dircopy);
 use Path::Tiny;
 use Digest::MD5 qw/md5_hex/;
@@ -75,3 +75,13 @@ subtest "sub get_html_stuff" => sub {
     ok (-f path($result_dir)->child('html-attributes-complete/p-class'), 'file exists p-class');
     ok (-f path($result_dir)->child('html-attributes-complete/global-id'), 'file exists global-id');
 };
+
+subtest "Clean project, that have no css files" => sub {
+    my $watcher = CSS::Watcher->new();
+    path ("t/monitoring/proj3/css")->mkpath;
+    path ("t/monitoring/proj3/.csswatcher")->touchpath;
+    my ($project_dir, $result_dir) = $watcher->get_html_stuff("t/monitoring/proj3/css");
+    is ($project_dir, path("t/monitoring/proj3"), 'Project directory must be defined');
+    is ($result_dir, undef, 'ac_html_stuff_directory must be undef, there no css files for parse.');
+};
+

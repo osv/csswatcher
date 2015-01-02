@@ -46,7 +46,7 @@ sub update {
         $prj->{monitor}->scan (
             sub {
                 my $file = shift;
-                if ($file =~ m/.css$/) {
+                if ($file =~ m/\.css$/) {
                     INFO " (Re)parse css: $file";
                     $changes++;
                     my $data = read_file ($file);
