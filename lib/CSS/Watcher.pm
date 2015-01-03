@@ -42,6 +42,7 @@ sub update {
         INFO "Update project: $proj_dir";
 
         my $prj = $self->_get_project ($proj_dir);
+        $prj->{parsed_files} = [];    # clean old parsed file list
 
         my (@ignore, @allow);
         my $cfg = path($proj_dir)->child('.csswatcher');
@@ -63,6 +64,8 @@ sub update {
             sub {
                 my $file = shift;
 
+                return if ($file ~~ @{$prj->{parsed_files}});
+
                 my $allow = 0;
                 foreach (@allow) {
                     if ($file =~ m/$_/) {
@@ -79,24 +82,61 @@ sub update {
                     }
                 }
 
-                if ($file =~ m/\.css$/) {
-                    INFO " (Re)parse css: $file";
-                    $changes++;
-                    my $data = read_file ($file);
-                    my ($classes, $ids) = $self->{parser_css}->parse_css ($data);
-                    $prj->{parsed}{$file} = {CLASSES => $classes,
-                                             IDS => $ids};
-                } elsif ($file =~ m/\.less$/) {
-                    $changes++;
-                    my ($classes, $ids, $requiries) = $self->{parser_less}->parse_less ($file);
-                    $prj->{parsed}{$file} = {CLASSES => $classes,
-                                             IDS => $ids};
-                }
+                ($file =~  m/\.css$/) ? $changes += $self->_parse_css              ($prj, $file) :
+                ($file =~ m/\.less$/) ? $changes += $self->_parse_less_and_imports ($prj, $file) : 1
+
             });
         INFO "Update done.";
         return ($changes, $proj_dir);
     }
     return;
+}
+
+sub _parse_css {
+    my ($self, $project, $file) = @_;
+
+    INFO " (Re)parse css: $file";
+    my $data = read_file ($file);
+    my ($classes, $ids) = $self->{parser_css}->parse_css ($data);
+    $project->{parsed}{$file} = {CLASSES => $classes,
+                                 IDS => $ids};
+    push @{$project->{parsed_files}}, $file;
+    return 1;
+}
+
+sub _parse_less {
+    my ($self, $project, $file) = @_;
+
+    INFO " (Re)parse less: $file";
+    my ($classes, $ids, $requiries) = $self->{parser_less}->parse_less ($file);
+    $project->{parsed}{$file} = {CLASSES => $classes,
+                                 IDS => $ids};
+    push @{$project->{parsed_files}}, $file;
+
+    # normilize path of requiried files, they may have .././
+    $project->{imports_less}{$file} =
+        [ map {path($file)->parent->child($_)->realpath()->stringify} @{$requiries} ];
+    return 1;
+}
+
+sub _parse_less_and_imports {
+    my ($self, $project, $file) = @_;
+
+    my $parsed_files = 1; # 1, cause we parse $file for sure., ++ if dependencies parsed too
+
+    $self->_parse_less ($project, $file);
+
+    while (my ($less_fname, $imports) = each $project->{imports_less}) {
+        foreach (@{$imports}) {
+            if ($file eq $_) {
+                next if ($less_fname ~~ @{$project->{parsed_files}});
+                INFO sprintf "  %s required by %s, parse them too.", path($file)->basename, path($less_fname)->basename;
+                $self->_parse_less($project, $less_fname);
+                $parsed_files++;
+            }
+        }
+    }
+    return $parsed_files;
 }
 
 sub project_stuff {

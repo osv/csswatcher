@@ -32,17 +32,15 @@ sub parse_less {
     if (!$?) {
        $err = '';
     } elsif ($! == 2) {
-        $err = sprintf "Cannot execute '%s'. See http://lesscss.org/#usage", $cmd->[0];
+        ERROR sprintf "Cannot execute '%s'. See http://lesscss.org/#usage", $cmd->[0];
     } else {
-        $err = sprintf "Failed to run \"%s\":\n  %s\n%s", join(' ', @$cmd), $err, $out;
+        DEBUG sprintf "Failed to run \"%s\":\n  %s\n%s", join(' ', @$cmd), $err, $out;
         $out = '';
     }
 
-    WARN $err unless $err eq '';
-
     my ($classes, $ids) = ({}, {});
     if ($out ne '') {
-        INFO sprintf " lessc done, parsing generated CSS for %s", path($filename)->basename;
+        INFO sprintf '%s: lessc done, parsing generated CSS', path($filename)->basename;
         ($classes, $ids) = CSS::Watcher::Parser->new->parse_css($out);
     }
 
@@ -54,7 +52,7 @@ sub parse_less {
         (m/\@import "(.*?)"/)  ? push @requiries, $1 . '.less' : 1;
     }
 
-    INFO sprintf " Imports for %s:\n-->%s", path($filename)->basename, join(', ', @requiries)  if (@requiries);
+    INFO sprintf "%s: imports: %s", path($filename)->basename, join(', ', @requiries)  if (@requiries);
 
     return ($classes, $ids, \@requiries);
 }
