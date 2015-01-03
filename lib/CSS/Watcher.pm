@@ -12,6 +12,7 @@ use Path::Tiny;
 use Digest::MD5 qw/md5_hex/;
 
 use CSS::Watcher::Parser;
+use CSS::Watcher::ParserLess;
 use CSS::Watcher::Monitor;
 
 our $VERSION = '0.1'; # Don't forget to set version and release date in POD!
@@ -24,7 +25,8 @@ sub new {
 
     return bless ({
         outputdir => $options->{'outputdir'} // DEFAULT_HTML_STUFF_DIR,
-        parser => CSS::Watcher::Parser->new(),
+        parser_css => CSS::Watcher::Parser->new(),
+        parser_less => CSS::Watcher::ParserLess->new(),
     }, $class);
 }
 
@@ -81,7 +83,12 @@ sub update {
                     INFO " (Re)parse css: $file";
                     $changes++;
                     my $data = read_file ($file);
-                    my ($classes, $ids) = $self->{parser}->parse_css ($data);
+                    my ($classes, $ids) = $self->{parser_css}->parse_css ($data);
+                    $prj->{parsed}{$file} = {CLASSES => $classes,
+                                             IDS => $ids};
+                } elsif ($file =~ m/\.less$/) {
+                    $changes++;
+                    my ($classes, $ids, $requiries) = $self->{parser_less}->parse_less ($file);
                     $prj->{parsed}{$file} = {CLASSES => $classes,
                                              IDS => $ids};
                 }
