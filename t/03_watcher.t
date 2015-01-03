@@ -74,6 +74,10 @@ subtest "sub get_html_stuff" => sub {
     ok (-f path($result_dir)->child('html-attributes-complete/global-class'), 'file exists global-class');
     ok (-f path($result_dir)->child('html-attributes-complete/p-class'), 'file exists p-class');
     ok (-f path($result_dir)->child('html-attributes-complete/global-id'), 'file exists global-id');
+
+    like (path($result_dir)->child('html-attributes-complete/global-class')->slurp_utf8,
+          qr(container Defined in), 'class "btn-info" in main.less');
+
 };
 
 subtest "Clean project, that have no css files" => sub {
