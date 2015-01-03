@@ -48,7 +48,7 @@ sub update {
                 while (<CFG>) {
                     chomp;
                     (m/^\s*ignore:\s*(.*?)\s*$/i) ? push @ignore, $1 :
-                    (m/^\s*use:\s*(.*?)\s*$/i) ? push @allow, $1: 1;
+                    (m/^\s*use:\s*(.*?)\s*$/i)    ? push @allow, $1  : 1;
                 }
                 close CFG;
             }
