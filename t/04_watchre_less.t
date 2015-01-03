@@ -1,13 +1,19 @@
 #!/usr/bin/perl -I..lib -Ilib
 use strict;
-use Test::More tests => 3;
+use Test::More;
 use File::Copy::Recursive qw(dircopy);
 use Path::Tiny;
+use File::Which;
 use Digest::MD5 qw/md5_hex/;
 
-BEGIN { use_ok("CSS::Watcher");
-        use_ok("CSS::Watcher::ParserLess");
-    }
+if (which('lessc')) {
+    plan tests => 3;
+} else {
+    plan skip_all => 'No less compilator found, install it via "npm install less"';
+}
+
+use_ok("CSS::Watcher");
+use_ok("CSS::Watcher::ParserLess");
 
 use constant TEST_HTML_STUFF_DIR => 't/monitoring/stuff_less/';
 

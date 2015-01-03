@@ -1,8 +1,15 @@
 #!/usr/bin/perl -I..lib -Ilib
 use strict;
-use Test::More tests => 4;
+use Test::More;
+use File::Which;
 
-BEGIN { use_ok("CSS::Watcher::ParserLess"); }
+if (which('lessc')) {
+    plan tests => 4;
+} else {
+    plan skip_all => 'No less compilator found, install it via "npm install less"';
+}
+
+use_ok("CSS::Watcher::ParserLess");
 
 my $parser = CSS::Watcher::ParserLess->new();
 
