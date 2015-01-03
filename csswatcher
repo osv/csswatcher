@@ -60,11 +60,23 @@ But it olso may have some extra, example:
     # ignore bootstrap css files
     ignore: bootstrap.*css$
 
+Another example:
+
+    % cat .csswatcher
+    # ignore all css
+    ignore: \.css$
+    # except app.css
+    use: app\.css
+
 =over 2
 
 =item IGNORE:
 
 Regexp for files that be ignored when scanning.
+
+=item USE:
+
+Regexp for match files that allowed to be parsed. Have higher order than "ignore".
 
 =back
 

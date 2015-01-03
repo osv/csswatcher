@@ -41,31 +41,42 @@ sub update {
 
         my $prj = $self->_get_project ($proj_dir);
 
-        my @ignore;
+        my (@ignore, @allow);
         my $cfg = path($proj_dir)->child('.csswatcher');
         if (-f $cfg) {
             if (open (CFG, '<:encoding(UTF-8)', $cfg)) {
                 while (<CFG>) {
                     chomp;
-                    if (m/^\s*ignore:\s*(.*?)\s*$/i) {
-                        push @ignore, $1;
-                    }
+                    (m/^\s*ignore:\s*(.*?)\s*$/i) ? push @ignore, $1 :
+                    (m/^\s*use:\s*(.*?)\s*$/i) ? push @allow, $1: 1;
                 }
                 close CFG;
             }
         }
+
 
         # scan new or changed files, cache them
         my $changes = 0;
         $prj->{monitor}->scan (
             sub {
                 my $file = shift;
-                foreach (@ignore) {
+
+                my $allow = 0;
+                foreach (@allow) {
                     if ($file =~ m/$_/) {
-                        INFO " Ignored $file =~\"$_\"";
-                        return;
+                        $allow = 1;
+                        last;
                     }
                 }
+                unless ($allow) {
+                    foreach (@ignore) {
+                        if ($file =~ m/$_/) {
+                            INFO " Ignored $file =~\"$_\"";
+                            return;
+                        }
+                    }
+                }
+
                 if ($file =~ m/\.css$/) {
                     INFO " (Re)parse css: $file";
                     $changes++;
