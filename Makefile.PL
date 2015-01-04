@@ -13,6 +13,8 @@ WriteMakefile(
         'Log::Log4perl' => 0,
         'File::Slurp' => 0,
         'Path::Tiny'  => 0,
+    },
+    "TEST_REQUIRES" => {
         'File::Copy::Recursive' => '0.38',
-        },
+    },
 );
