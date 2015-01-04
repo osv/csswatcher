@@ -130,7 +130,7 @@ CSS::Watcher::Monitor - Monitor files for changes.
 
 =head1 DESCRIPTION
 
-Watch for changes, call callback sub.
+Watch for changes, call callback sub. Call callback on first scan too.
 
 =head1 SEE ALSO
 

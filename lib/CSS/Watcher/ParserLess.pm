@@ -67,7 +67,7 @@ __END__
 
 =head1 NAME
 
-CSS::Watcher::ParserLess - Extract classes, ids from css from .less files
+CSS::Watcher::ParserLess - Extract classes, ids from .less files
 
 =head1 SYNOPSIS
 
@@ -80,7 +80,7 @@ CSS::Watcher::ParserLess - Extract classes, ids from css from .less files
 
 =head1 DESCRIPTION
 
-Use lessc for parsing less files.
+Use lessc for compile less and parse css result by CSS::Watcher::Parser.
 
 =head1 AUTHOR
 

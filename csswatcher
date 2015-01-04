@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-csswatcher - daemon/client for scanning css files and build ac-html completion.
+csswatcher - daemon/client for scanning css, less files and build Emacs ac-html completion.
 
 =head1 DESCRIPTION
 
@@ -79,6 +79,12 @@ Regexp for files that be ignored when scanning.
 Regexp for match files that allowed to be parsed. Have higher order than "ignore".
 
 =back
+
+=head1 COMMAND LINE PARAMETERS
+
+See
+
+    % csswatcher --help
 
 =head1 SEE ALSO
 

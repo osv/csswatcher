@@ -15,7 +15,7 @@ use CSS::Watcher::Parser;
 use CSS::Watcher::ParserLess;
 use CSS::Watcher::Monitor;
 
-our $VERSION = '0.1'; # Don't forget to set version and release date in POD!
+our $VERSION = '0.2';
 
 use constant DEFAULT_HTML_STUFF_DIR => '~/.emacs.d/ac-html-csswatcher/completion/';
 
@@ -258,7 +258,7 @@ __END__
 
 =head1 NAME
 
-CSS::Watcher - class, id completion for ac-html
+CSS::Watcher - class, id completion for ac-html.
 
 =head1 SYNOPSIS
 
@@ -272,7 +272,8 @@ CSS::Watcher - class, id completion for ac-html
 
 =head1 DESCRIPTION
 
-Watch for changes in css files, parse them and populate ac-html completion.
+Watch for changes in css less files, parse them and populate ac-html completion.
+Supported imports in less, reparse if imported file changed.
 
 =head1 AUTHOR
 
