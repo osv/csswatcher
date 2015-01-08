@@ -46,6 +46,12 @@ sub update {
 
         my (@ignore, @allow);
         my $cfg = path($proj_dir)->child('.csswatcher');
+
+        # clear project cache if .csswatcher changed
+        if ($prj->{monitor}->is_changed($cfg)) {
+            $prj->{monitor}->make_dirty();
+        }
+
         if (-f $cfg) {
             if (open (CFG, '<:encoding(UTF-8)', $cfg)) {
                 while (<CFG>) {
@@ -56,7 +62,6 @@ sub update {
                 close CFG;
             }
         }
-
 
         # scan new or changed files, cache them
         my $changes = 0;
