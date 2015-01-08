@@ -39,13 +39,46 @@ subtest "Scan files" => sub {
                           t/monitoring/prj1/css/override.css
                           t/monitoring/prj1/css/ignored.css
                      );
-    my $file_clount = 0;
-    $mon->scan(sub {
-                   my $file = shift;
-                   ok (grep (/${file}$/, @expect_files), "Check file present $file");
-                   $file_clount++;
-               });
-    is ($file_clount, scalar (@expect_files), 'Expected file count');
+    subtest "First check" => sub {
+        my $file_clount = 0;
+        $mon->scan(sub {
+                       my $file = shift;
+                       ok (grep (/${file}$/, @expect_files), "Check file present $file");
+                       $file_clount++;
+                   });
+        is ($file_clount, scalar (@expect_files), 'Expected file count');
+    };
+
+    subtest "Second check" => sub {
+        my $file_clount = 0;
+        $mon->scan(sub {
+                       my $file = shift;
+                       BAIL_OUT("I don't expect that file $file being changed.");
+                   });
+        ok(1);
+    };
+
+    subtest "Force recheck" => sub {
+        my $file_clount = 0;
+        $mon->make_dirty;
+        $mon->scan(sub {
+                       my $file = shift;
+                       ok (grep (/${file}$/, @expect_files), "Check file present $file");
+                       $file_clount++;
+                   });
+        is ($file_clount, scalar (@expect_files), 'Expected file changed count');
+    };
+
+    # subtest "Force re-check" => sub {
+    #     my $file_clount = 0;
+    #     $mon->make_dirty;
+    #     $mon->scan(sub {
+    #                    my $file = shift;
+    #                    ok (grep (/${file}$/, @expect_files), "Check file present $file");
+    #                    $file_clount++;
+    #                });
+    #     is ($file_clount, scalar (@expect_files), 'Expected file changed count');
+    # };
 
     subtest "Create new file, check for changes" => sub {
         my $cssfile = "t/monitoring/prj1/css/new.css";

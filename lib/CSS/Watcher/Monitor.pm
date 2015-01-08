@@ -58,6 +58,11 @@ sub is_changed {
         \%objstat);
 }
 
+sub make_dirty {
+    my $self = shift;
+    $self->{oldstats} = {};
+}
+
 sub _get_stat {
     my ( $self, $filename ) = @_;
     return $self->{oldstats}{$filename} // {};
@@ -139,6 +144,9 @@ CSS::Watcher::Monitor - Monitor files for changes.
 
    # Check does file changed since last $cm->scan
    say $cm->is_changed('/foo/bar/baz.txt');
+
+   # clean old file stat cache
+   $cm->make_dirty();
 
 =head1 DESCRIPTION
 
