@@ -48,6 +48,16 @@ sub scan {
     return $changes;
 }
 
+sub is_changed {
+    my ( $self, $filename ) = @_;
+    my %objstat;
+    @objstat{@STAT_FIELDS} = stat ( $filename );
+
+    not $self->_deep_compare (
+        $self->_get_stat ($filename),
+        \%objstat);
+}
+
 sub _get_stat {
     my ( $self, $filename ) = @_;
     return $self->{oldstats}{$filename} // {};
@@ -127,6 +137,8 @@ CSS::Watcher::Monitor - Monitor files for changes.
                  # process changed file or first scan new file
                  } );
 
+   # Check does file changed since last $cm->scan
+   say $cm->is_changed('/foo/bar/baz.txt');
 
 =head1 DESCRIPTION
 

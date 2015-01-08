@@ -61,6 +61,25 @@ CSS
         $mon->scan(sub {
                        is (shift, $cssfile, "It must be $cssfile only as new file");
                    }
-        )
-    }
+               );
+
+        subtest "is_changed method" => sub {
+
+            ok (!$mon->is_changed($cssfile), "Not changed");
+
+            # wait few seconds
+            sleep 2;
+
+            open(my $fh, '>', $cssfile);
+            print $fh <<CSS
+.container {
+ color: #fff;
+}
+CSS
+                ;
+            close $fh;
+
+            ok ($mon->is_changed($cssfile), "Changed");
+        }
+    };
 };
