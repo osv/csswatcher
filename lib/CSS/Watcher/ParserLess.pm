@@ -75,7 +75,10 @@ CSS::Watcher::ParserLess - Extract classes, ids from .less files
    my $parser = CSS::Watcher::Parser->new()
 
    # return requiries - ref array of dependencies
-   my ($hclasses, $hids, $requiries) = parser->parse_less ('@import "foo.less"');
+   my ($hclasses, $hids, $requiries) = parser->parse_less (<<LESS)
+   @import "foo.less"
+   LESS
+   ;
    # $requiries = ["foo.less"]
 
 =head1 DESCRIPTION
