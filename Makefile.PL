@@ -18,4 +18,15 @@ WriteMakefile(
     "TEST_REQUIRES" => {
         'File::Copy::Recursive' => '0.38',
     },
+    (eval { ExtUtils::MakeMaker->VERSION(6.46) } ? (META_MERGE => {
+        'meta-spec' => { version => 2 },
+        resources => {
+            repository => {
+                type => 'git',
+                url  => 'https://github.com/osv/csswatcher.git',
+                web  => 'https://github.com/osv/csswatcher',
+            },
+        }})
+         : ()
+     ),
 );
