@@ -167,7 +167,7 @@ my $daemon = 0;
 my $stop = 0;
 
 GetOptions ( "socket=s" => \$socket_file,
-             'logfile=i' => \$log_file,
+             'logfile=s' => \$log_file,
              'outputdir=s' => \$html_stuff_dir,
              'debug=s' => \$debug_level,
              'pidfile=s' => \$pid_file,
