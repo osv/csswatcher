@@ -15,7 +15,7 @@ use CSS::Watcher::Parser;
 use CSS::Watcher::ParserLess;
 use CSS::Watcher::Monitor;
 
-our $VERSION = '0.3.4';
+our $VERSION = '0.3.5';
 
 use constant DEFAULT_HTML_STUFF_DIR => '~/.emacs.d/ac-html-csswatcher/completion/';
 
@@ -131,7 +131,7 @@ sub _parse_less_and_imports {
 
     $self->_parse_less ($project, $file);
 
-    while (my ($less_fname, $imports) = each $project->{imports_less}) {
+    while (my ($less_fname, $imports) = each %{$project->{imports_less}}) {
         foreach (@{$imports}) {
             if ($file eq $_) {
                 next if ($less_fname ~~ @{$project->{parsed_files}});
