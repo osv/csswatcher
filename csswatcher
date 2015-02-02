@@ -80,6 +80,12 @@ Regexp for match files that allowed to be parsed. Have higher order than "ignore
 
 =back
 
+=head1 SYMLINKS PROBLEM
+
+Symlink that have "../" ignored to prevent circular symlink, however I hope you don't symlink to upper directory
+(ex. "~/projects" ) that contains your project (ex. ~/projects/myproject).
+If so, you need ignore it in ".csswatcher"
+
 =head1 COMMAND LINE PARAMETERS
 
 See
