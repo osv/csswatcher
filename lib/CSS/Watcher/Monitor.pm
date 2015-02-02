@@ -93,6 +93,10 @@ sub _get_files_info {
           # Expand whole directory tree
           my @work = $self->_read_dir( $dir );
           while ( my $obj = shift @work ) {
+              next              # // skip symlinks that have "../" (circular symlink)
+                if ( -d $obj
+                  && -l $obj
+                  && readlink($obj) =~ m|\.\./| );
               if (-f $obj) {
                   my %objstat;
                   @objstat{@STAT_FIELDS} = stat ( $obj );
