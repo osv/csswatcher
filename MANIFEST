@@ -15,6 +15,7 @@ t/02_monitor.t
 t/03_watcher.t
 t/04_watcher_less.t
 t/fixtures/prj1/.csswatcher
+t/fixtures/prj1/css/css
 t/fixtures/prj1/css/ignored.css
 t/fixtures/prj1/css/index.html
 t/fixtures/prj1/css/override.css
