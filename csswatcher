@@ -123,11 +123,11 @@ sub usage {
     my $Line;
     my ($Script) = ( $0 =~ m#([^\\/]+)$# );
 
-    $Line = "-" x length( $Script );
+    $Line = "-" x length( "$Script v$CSS::Watcher::VERSION" );
 
     print << "EOT";
 
-$Script
+$Script v$CSS::Watcher::VERSION
 $Line
 Monitor project and create completion for ac-html
 
@@ -138,6 +138,7 @@ Monitor project and create completion for ac-html
     OBJECT......Directory or file, this script will find project home like projectile
     socket......Socket file, default
                 @{[SOCKET_FILE]}
+    version.....Print version
 
 Daemon options:
     daemon......Start daemon (it automatically start if OBJECT defined).
@@ -165,6 +166,7 @@ my $debug_level = 'INFO';
 my $restart = 0;
 my $daemon = 0;
 my $stop = 0;
+my $show_version = 0;
 
 GetOptions ( "socket=s" => \$socket_file,
              'logfile=s' => \$log_file,
@@ -174,6 +176,7 @@ GetOptions ( "socket=s" => \$socket_file,
              'restart' => \$restart,
              'daemon' => \$daemon,
              'stop' => \$stop,
+             'version' => \$show_version,
              "help|?"  => \$help);
 
 
@@ -183,6 +186,11 @@ $html_stuff_dir = path( $html_stuff_dir );
 $pid_file = path( $pid_file );
 
 my $file = $ARGV[0];
+
+if ($show_version) {
+    print "csswatcher $CSS::Watcher::VERSION\n";
+    exit;
+}
 
 if ($help || (!($restart || $daemon || $stop) && ($file // '') eq '')) {
     usage();
