@@ -44,12 +44,16 @@ sub update {
         my $prj = $self->_get_project ($proj_dir);
         $prj->{parsed_files} = [];    # clean old parsed file list
 
+        my $changes = 0;
+
         my (@ignore, @allow);
         my $cfg = path($proj_dir)->child('.csswatcher');
 
         # clear project cache if .csswatcher changed
         if ($prj->{monitor}->is_changed($cfg)) {
             $prj->{monitor}->make_dirty();
+            delete $prj->{parsed};
+            $changes++;
         }
 
         if (-f $cfg) {
@@ -64,7 +68,6 @@ sub update {
         }
 
         # scan new or changed files, cache them
-        my $changes = 0;
         $prj->{monitor}->scan (
             sub {
                 my $file = shift;
@@ -182,6 +185,7 @@ sub project_stuff {
     return (\%classes, \%ids);
 }
 
+# clean old output html complete stuff and build new
 sub build_ac_html_stuff {
     my $self = shift;
     my $proj_dir = shift;
