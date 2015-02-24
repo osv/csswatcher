@@ -47,9 +47,9 @@ sub parse_less {
     # Find dependencies for this less file.
     my @requiries;
     foreach (path($filename)->lines_utf8()) {
-        (m/\@import "(.*?.less)"/) ? push @requiries, $1 :
-        (m/\@import "(.*?.css)"/)  ? push @requiries, $1 :
-        (m/\@import "(.*?)"/)  ? push @requiries, $1 . '.less' : 1;
+        (m/^\s*?\@import\s+"(.*?.less)"/) ? push @requiries, $1 :
+        (m/^\s*?\@import\s+"(.*?.css)"/)  ? push @requiries, $1 :
+        (m/^\s*?\@import\s+"(.*?)"/)  ? push @requiries, $1 . '.less' : 1;
     }
 
     INFO sprintf "%s: imports: %s", path($filename)->basename, join(', ', @requiries)  if (@requiries);
