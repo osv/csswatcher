@@ -119,8 +119,15 @@ sub _parse_less {
     push @{$project->{parsed_files}}, $file;
 
     # normilize path of requiried files, they may have .././
-    $project->{imports_less}{$file} =
-        [ map {path($file)->parent->child($_)->realpath()->stringify} @{$requiries} ];
+    # eval {
+    #     $project->{imports_less}{$file} =
+    #         [ map {path($file)->parent->child($_)->realpath()->stringify} @{$requiries} ];
+    # };
+    # if ($@) {
+    #     WARN $@;
+    # }
+        $project->{imports_less}{$file} =
+            [ map {path($file)->parent->child($_)->realpath()->stringify} @{$requiries} ];
     return 1;
 }
 
