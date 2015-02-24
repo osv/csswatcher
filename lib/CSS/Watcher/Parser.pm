@@ -58,9 +58,13 @@ sub _parse_css {
                 next unless (ref $_ eq 'ARRAY');
                 foreach my $rule (@{$_}) {
                     if (exists $rule->{class}) {
-                        $classes->{
-                            exists ($rule->{element}) ? $rule->{element} : "global"
-                        }{ $rule->{class} }++;
+                        # Bug, selector for .foo.bar return class foo.bar
+                        # so split this selector by "."
+                        foreach my $classname (split /\./, $rule->{class}) {
+                            $classes->{
+                                exists ($rule->{element}) ? $rule->{element} : "global"
+                            }{ $classname }++;
+                        }
                     }
                     if (exists $rule->{id}) {
                         $ids->{

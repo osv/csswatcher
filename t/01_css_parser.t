@@ -1,6 +1,6 @@
 #!/usr/bin/perl -I..lib -Ilib
 use strict;
-use Test::More tests => 6;
+use Test::More tests => 8;
 
 BEGIN { use_ok("CSS::Watcher::Parser"); }
 
@@ -34,6 +34,30 @@ CSS
         ;
     my $expect = {"global" => {"id1" => 1}};
     is_deeply($ids, $expect, "id selector");
+    
+};
+
+subtest "Multiple class selector" => sub {
+    my ($classes) = $parser->parse_css(<<CSS)
+.fv-form-horizontal.fv-form-foundation {foo: bar; zzz: xxx}
+CSS
+        ;
+
+    my $expect = {"global" => {'fv-form-horizontal' => 1,
+                               'fv-form-foundation' => 1}};
+    is_deeply($classes, $expect, "multiple class");
+    
+};
+
+subtest "Multiple class selector for tag" => sub {
+    my ($classes) = $parser->parse_css(<<CSS)
+div.fv-form-horizontal.fv-form-foundation {foo: bar; zzz: xxx}
+CSS
+        ;
+
+    my $expect = {"div" => {'fv-form-horizontal' => 1,
+                               'fv-form-foundation' => 1}};
+    is_deeply($classes, $expect, "multiple class");
     
 };
 
