@@ -39,8 +39,7 @@ subtest "Generate classes and ids" => sub {
     is ($project_dir, path("t/monitoring/prj1"),
         "Search for \".watcher\" file");
 
-    is ($changes, 2, 'Must be 2 css files');
-
+    is ($changes, 3, 'Must be 2 css files');
     my ($classes, $ids) = $watcher->project_stuff ($project_dir);
 
     ok ($classes->{global}{container} =~ m| css/override\.css|, ".container must be present in override.css");
@@ -80,12 +79,18 @@ subtest "sub get_html_stuff" => sub {
 
 };
 
-subtest "Clean project, that have no css files" => sub {
-    my $watcher = CSS::Watcher->new();
+subtest "Clean project, that have no css files and no .csswatcher" => sub {
+    my $watcher = CSS::Watcher->new({'outputdir' => TEST_HTML_STUFF_DIR});
     path ("t/monitoring/proj3/css")->mkpath;
-    path ("t/monitoring/proj3/.csswatcher")->touchpath;
+    path ("t/monitoring/proj3/.git")->touchpath;
     my ($project_dir, $result_dir) = $watcher->get_html_stuff("t/monitoring/proj3/css");
     is ($project_dir, path("t/monitoring/proj3"), 'Project directory must be defined');
     is ($result_dir, undef, 'ac_html_stuff_directory must be undef, there no css files for parse.');
+
+    subtest "Create .csswatcher" => sub {
+        path ("t/monitoring/proj3/.csswatcher")->touchpath;
+        ($project_dir, $result_dir) = $watcher->get_html_stuff("t/monitoring/proj3/css");
+        isnt ($result_dir, undef, '.csswatcher exist ac_html_stuff_directory must be defined');
+    }
 };
 

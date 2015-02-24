@@ -53,6 +53,9 @@ sub is_changed {
     my %objstat;
     @objstat{@STAT_FIELDS} = stat ( $filename );
 
+    # this file may never present before and not exist, return false
+    return 0 unless (defined ($objstat{atime}) && -f $filename);
+
     not $self->_deep_compare (
         $self->_get_stat ($filename),
         \%objstat);

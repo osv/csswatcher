@@ -51,6 +51,7 @@ sub update {
 
         # clear project cache if .csswatcher changed
         if ($prj->{monitor}->is_changed($cfg)) {
+            INFO ('.csswatcher changed, resetting');
             $prj->{monitor}->make_dirty();
             delete $prj->{parsed};
             $changes++;
