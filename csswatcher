@@ -280,7 +280,15 @@ if (!defined $probe || $restart) {
 
             # "WATCH: " command
             if (my ($watchobj) = $task =~/WATCH: (.+)/) {
-                my ($project_dir, $ac_html_stuff_dir) = $watcher->get_html_stuff ($watchobj);
+                my ($project_dir, $ac_html_stuff_dir);
+                eval {
+                    ($project_dir, $ac_html_stuff_dir) = $watcher->get_html_stuff ($watchobj);
+                };
+                
+                if ($@) {
+                    ERROR "Object parse fail \"$watchobj\", reason: $@";
+                }
+
                 if (defined $ac_html_stuff_dir) {
                     print $clientsocket "PROJECT: $project_dir\n";
                     print $clientsocket "ACSOURCE: $ac_html_stuff_dir\n";
