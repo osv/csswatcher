@@ -21,13 +21,12 @@ To stop manually:
 
 =head2 Build completions for your project.
 
-The concept of  a project is pretty basic like  projectile.el use it -
-just a folder  containing special file.  Currently  git, mercurial and
+The concept of  a project is pretty basic like  projectile.el. Currently  git, mercurial and
 bazaar repos are considered projects by  default.  If you want to mark
 a folder  manually as a  project just  create an empty  .projectile or
 .csswatcher file in it.
 
-I home you have no .git in root directory (or home ~/.git),
+I hope you have no .git in root directory (or home ~/.git),
 because it may be occasion for full system scanning if you forgot setup project directory.
 
    % touch      ~/work/bootstrap/dist/.csswatcher
@@ -98,6 +97,7 @@ https://github.com/osv/ac-html-csswatcher
 
 https://github.com/cheunghy/ac-html
 
+https://github.com/osv/company-web
 
 =head1 AUTHOR
 

@@ -1,8 +1,10 @@
 csswatcher [![Build Status](https://travis-ci.org/osv/csswatcher.png?branch=master)](https://travis-ci.org/osv/csswatcher)
 =======
 
-Generate completion suitable for [ac-html](https://github.com/cheunghy/ac-html).
-Used by [ac-html-csswatcher](https://github.com/osv/ac-html-csswatcher) project.
+Generate completion suitable for [ac-html](https://github.com/cheunghy/ac-html),
+[company-web](https://github.com/osv/company-web)
+
+Used by [ac-html-csswatcher](https://github.com/osv/ac-html-csswatcher) project to provide emacs CSS, LESS class names completion.
 
 ## Installing
 
@@ -32,8 +34,8 @@ man csswatcher
 
 ## File .csswatcher
 
-May be used like .projectile or .git, etc for setting project directory and
-setup ignored files
+May be used like .projectile or .git for setting project home directory and
+setup ignored files:
 
 ```shell
 % cat .csswatcher
