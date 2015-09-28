@@ -8,14 +8,15 @@ WriteMakefile(
     EXE_FILES => [ 'csswatcher' ],
 
     PREREQ_PM => {
-        'Carp'              => '0',
+        'PID::File'             => 0,
+        'Carp'                  => '0',
         'CSS::Selector::Parser' => '0',
-        'Log::Log4perl' => 0,
-        'File::Slurp' => 0,
-        'Path::Tiny'  => 0,
-        'File::Which' => 0,
-        'IPC::Run3' => 0,
-    },
+        'Log::Log4perl'         => 0,
+        'File::Slurp'           => 0,
+        'Path::Tiny'            => 0,
+        'File::Which'           => 0,
+        'IPC::Run3'             => 0,
+      },
     "TEST_REQUIRES" => {
         'File::Copy::Recursive' => '0.38',
     },
