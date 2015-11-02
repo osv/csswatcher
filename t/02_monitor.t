@@ -27,7 +27,7 @@ subtest "new()" => sub {
 
 subtest "Scan files" => sub {
 
-    path ("t/monitoring/")->remove_tree({save => 0});
+    path ("t/monitoring/")->remove_tree({safe => 0});
     path ("t/monitoring/")->mkpath;
 
     dircopy "t/fixtures/prj1/", "t/monitoring/prj1";

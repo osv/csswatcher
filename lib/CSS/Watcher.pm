@@ -10,12 +10,13 @@ use Log::Log4perl qw(:easy);
 use File::Slurp qw/read_file write_file/;
 use Path::Tiny;
 use Digest::MD5 qw/md5_hex/;
+use List::MoreUtils qw(any);
 
 use CSS::Watcher::Parser;
 use CSS::Watcher::ParserLess;
 use CSS::Watcher::Monitor;
 
-our $VERSION = '0.4.3';
+our $VERSION = '0.4.5';
 
 use constant DEFAULT_HTML_STUFF_DIR => '~/.emacs.d/ac-html-csswatcher/completion/';
 
@@ -73,7 +74,7 @@ sub update {
             sub {
                 my $file = shift;
 
-                return if ($file ~~ @{$prj->{parsed_files}});
+                return if (any {$_ eq $file} @{$prj->{parsed_files}});
 
                 my $allow = 0;
                 foreach (@allow) {
@@ -145,7 +146,7 @@ sub _parse_less_and_imports {
     while (my ($less_fname, $imports) = each %{$project->{imports_less}}) {
         foreach (@{$imports}) {
             if ($file eq $_) {
-                next if ($less_fname ~~ @{$project->{parsed_files}});
+                next if (any {$_ eq $less_fname} @{$project->{parsed_files}});
                 INFO sprintf "  %s required by %s, parse them too.", path($file)->basename, path($less_fname)->basename;
                 $self->_parse_less($project, $less_fname);
                 $parsed_files++;

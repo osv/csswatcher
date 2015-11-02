@@ -25,7 +25,7 @@ subtest "Default output directory" => sub {
 
 subtest "Generate classes and ids" => sub {
 
-    path ("t/monitoring/")->remove_tree({save => 0});
+    path ("t/monitoring/")->remove_tree({safe => 0});
     path ("t/monitoring/")->mkpath;
     dircopy "t/fixtures/prj1/", "t/monitoring/prj1";
 
@@ -58,7 +58,7 @@ subtest "Generate classes and ids" => sub {
 
 subtest "sub get_html_stuff" => sub {
 
-    path ("t/monitoring/")->remove_tree({save => 0});
+    path ("t/monitoring/")->remove_tree({safe => 0});
     path ("t/monitoring/")->mkpath;
     dircopy "t/fixtures/prj1/", "t/monitoring/prj1";
 

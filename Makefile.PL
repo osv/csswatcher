@@ -17,6 +17,7 @@ WriteMakefile(
         'Path::Tiny'            => 0,
         'File::Which'           => 0,
         'IPC::Run3'             => 0,
+        'List::MoreUtils'       => 0,
       },
     "TEST_REQUIRES" => {
         'File::Copy::Recursive' => '0.38',

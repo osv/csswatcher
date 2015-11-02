@@ -28,7 +28,7 @@ CSS
 };
 
 subtest "Simple css, Ids" => sub {
-    my ($_, $ids) = $parser->parse_css(<<CSS)
+    my ($classes, $ids) = $parser->parse_css(<<CSS)
 #id1 {foo: bar; zzz: xxx} */
 CSS
         ;
