@@ -3,6 +3,7 @@ use ExtUtils::MakeMaker;
 
 WriteMakefile(
     NAME => "CSS::Watcher",
+    ABSTRACT => "CSS parser, data generator for ac-html-csswatcher.el",
     VERSION_FROM => "lib/CSS/Watcher.pm",
     AUTHOR => 'Olexandr Sydorchuk',
     EXE_FILES => [ 'csswatcher' ],

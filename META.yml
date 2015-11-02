@@ -1,5 +1,5 @@
 ---
-abstract: unknown
+abstract: 'CSS parser, data generator for ac-html-csswatcher.el'
 author:
   - 'Olexandr Sydorchuk'
 build_requires:
@@ -13,7 +13,7 @@ license: unknown
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
   version: '1.4'
-name: CSS_Watcher
+name: CSS-Watcher
 no_index:
   directory:
     - t
@@ -22,6 +22,11 @@ requires:
   CSS::Selector::Parser: '0'
   Carp: '0'
   File::Slurp: '0'
+  File::Which: '0'
+  IPC::Run3: '0'
   Log::Log4perl: '0'
+  PID::File: '0'
   Path::Tiny: '0'
-version: '0.3'
+resources:
+  repository: https://github.com/osv/csswatcher.git
+version: v0.4.3
