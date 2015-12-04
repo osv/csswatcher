@@ -1,6 +1,6 @@
 #!/usr/bin/perl -I..lib -Ilib
 use strict;
-use Test::More tests => 3;
+use Test::More tests => 4;
 use File::Copy::Recursive qw(dircopy);
 use Path::Tiny;
 
@@ -116,3 +116,34 @@ CSS
         }
     };
 };
+
+subtest '"skip_dirs" command of .csswatcher. Ignore directory' => sub {
+    path("t/monitoring/")->mkpath;
+
+    dircopy "t/fixtures/prj2_skip/", "t/monitoring/prj2_skip";
+
+    my $mon = CSS::Watcher::Monitor->new( { dir => 't/monitoring/prj2_skip' } );
+    my @expect_files = qw(
+      t/monitoring/prj2_skip/.csswatcher
+      t/monitoring/prj2_skip/somedir/1.css
+      t/monitoring/prj2_skip/somedir/main.css
+    );
+
+    subtest "First check" => sub {
+        my $file_clount = 0;
+        $mon->scan(
+            sub {
+                my $file = shift;
+                ok(
+                    grep ( /${file}$/, @expect_files ),
+                    "Check file present $file"
+                );
+                $file_clount++;
+            },
+            ['thisdirmustbeignored']
+        );
+        is( $file_clount, scalar(@expect_files), 'Expected file count' );
+    };
+
+};
+

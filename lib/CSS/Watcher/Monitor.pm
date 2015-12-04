@@ -7,6 +7,7 @@ use Carp;
 use Log::Log4perl qw(:easy);
 use File::Spec;
 use Fcntl ':mode';
+use List::MoreUtils qw(any);
 
 our @STAT_FIELDS = qw(
                          dev inode mode num_links uid gid rdev size atime mtime ctime
@@ -30,12 +31,11 @@ sub dir {
 }
 
 sub scan {
-    my $self = shift;
-    my $callback = shift;
+    my ($self, $callback, $skip_dirs) = @_;
 
     return 0 unless (defined $callback && defined $self->dir && -d $self->dir);
 
-    my $newstat = $self->_get_files_info ($self->dir);
+    my $newstat = $self->_get_files_info( $self->dir, $skip_dirs );
 
     my $changes = 0;
     while ( my( $fname, $stat ) = each %{$newstat->{files}} ) {
@@ -85,11 +85,11 @@ sub _deep_compare {
 
 # Scan our target object
 sub _get_files_info {
-  my $self = shift;
-  my $dir = shift;
-
+  my ( $self, $dir, $skip_dirs ) = @_;
   my %info;
 
+  $skip_dirs ||= [];
+  
   eval {
       if ( -d $dir ) {
 
@@ -104,7 +104,8 @@ sub _get_files_info {
                   my %objstat;
                   @objstat{@STAT_FIELDS} = stat ( $obj );
                   $info{ files }{ $obj } = \%objstat;
-              } elsif ( -d $obj ) {
+              }
+              elsif ( -d $obj && ( !any { $obj =~ m/$_/; } @{$skip_dirs} ) ) {
                   # Depth first to simulate recursion
                   unshift @work, $self->_read_dir( $obj );
               }
