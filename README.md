@@ -8,7 +8,14 @@ Used by [ac-html-csswatcher](https://github.com/osv/ac-html-csswatcher) project 
 
 ## Installing
 
-Using cpanminus:
+Using cpan:
+
+```
+sudo cpan i CSS::Watcher
+
+```
+
+Using cpanminus from source:
 
 ```shell
 git clone https://github.com/osv/csswatcher.git
