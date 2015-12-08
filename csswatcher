@@ -58,6 +58,8 @@ But it olso may have some extra, example:
     ignore: min\.css$
     # ignore bootstrap css files
     ignore: bootstrap.*css$
+    # skip recursive scanning node_modules, it may be slow!
+    skip: node_modules
 
 Another example:
 
@@ -66,6 +68,8 @@ Another example:
     ignore: \.css$
     # except app.css
     use: app\.css
+    # and skip recursive scanning node_modules, it may be slow!
+    skip: node_modules
 
 =over 2
 
@@ -76,6 +80,10 @@ Regexp for files that be ignored when scanning.
 =item USE:
 
 Regexp for match files that allowed to be parsed. Have higher order than "ignore".
+
+=item SKIP:
+
+Regexp to avoid recursive scan of directories. "node_modules", ".meteor" are good candidates for it!
 
 =back
 

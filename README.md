@@ -43,6 +43,8 @@ setup ignored files:
 ignore: min\.css$
 # ignore bootstrap css files
 ignore: bootstrap.*css$
+# skip recursive scanning node_modules, it may be slow!
+skip: node_modules
 ```
 
 Another example:
@@ -52,6 +54,8 @@ Another example:
 # ignore all css except app.css
 ignore: \.css$
 use: app\.css
+# and skip recursive scanning node_modules, it may be slow!
+skip: node_modules
 ```
 
 See also https://github.com/osv/ac-html-csswatcher
