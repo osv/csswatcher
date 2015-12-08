@@ -1,6 +1,6 @@
 #!/usr/bin/perl -I..lib -Ilib
 use strict;
-use Test::More tests => 6;
+use Test::More tests => 7;
 use File::Copy::Recursive qw(dircopy);
 use Path::Tiny;
 use Digest::MD5 qw/md5_hex/;
@@ -39,7 +39,7 @@ subtest "Generate classes and ids" => sub {
     is ($project_dir, path("t/monitoring/prj1"),
         "Search for \".watcher\" file");
 
-    is ($changes, 3, 'Must be 2 css files');
+    is ($changes, 3, 'Must be 2 css files and 1 .csswatcher file');
     my ($classes, $ids) = $watcher->project_stuff ($project_dir);
 
     ok ($classes->{global}{container} =~ m| css/override\.css|, ".container must be present in override.css");
@@ -94,3 +94,13 @@ subtest "Clean project, that have no css files and no .csswatcher" => sub {
     }
 };
 
+
+subtest '"skip" in .csswatcher' => sub {
+    path ("t/monitoring/")->remove_tree({safe => 0});
+    path ("t/monitoring/")->mkpath;
+    dircopy "t/fixtures/prj2_skip/", "t/monitoring/prj2_skip";
+
+    my $watcher = CSS::Watcher->new({'outputdir' => TEST_HTML_STUFF_DIR});
+    my ($changes, $project_dir) = $watcher->update("t/monitoring/prj2_skip");
+    is ($changes, 3, 'Must be 2 css files and 1 .csswatcher');
+};
