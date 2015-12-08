@@ -47,7 +47,7 @@ sub update {
 
         my $changes = 0;
 
-        my (@ignore, @allow);
+        my (@ignore, @allow, @skip_dirs);
         my $cfg = path($proj_dir)->child('.csswatcher');
 
         # clear project cache if .csswatcher changed
@@ -62,8 +62,9 @@ sub update {
             if (open (CFG, '<:encoding(UTF-8)', $cfg)) {
                 while (<CFG>) {
                     chomp;
-                    (m/^\s*ignore:\s*(.*?)\s*$/i) ? push @ignore, $1 :
-                    (m/^\s*use:\s*(.*?)\s*$/i)    ? push @allow, $1  : 1;
+                    (m/^\s*ignore:\s*(.*?)\s*$/i) ? push @ignore,    $1 :
+                    (m/^\s*skip:\s*(.*?)\s*$/i)   ? push @skip_dirs, $1 :
+                    (m/^\s*use:\s*(.*?)\s*$/i)    ? push @allow,     $1 : 1;
                 }
                 close CFG;
             }
@@ -91,11 +92,10 @@ sub update {
                         }
                     }
                 }
+                ($file =~  m/\.css$/) ? $changes += 1 && $self->_parse_css              ($prj, $file) :
+                ($file =~ m/\.less$/) ? $changes += 1 && $self->_parse_less_and_imports ($prj, $file) : 1;
 
-                ($file =~  m/\.css$/) ? $changes += $self->_parse_css              ($prj, $file) :
-                ($file =~ m/\.less$/) ? $changes += $self->_parse_less_and_imports ($prj, $file) : 1
-
-            });
+            }, \@skip_dirs);
         INFO "Update done.";
         return ($changes, $proj_dir);
     }
