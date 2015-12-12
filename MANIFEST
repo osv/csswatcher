@@ -20,6 +20,10 @@ t/fixtures/prj1/css/ignored.css
 t/fixtures/prj1/css/index.html
 t/fixtures/prj1/css/override.css
 t/fixtures/prj1/css/simple.css
+t/fixtures/prj2_skip/.csswatcher
+t/fixtures/prj2_skip/somedir/1.css
+t/fixtures/prj2_skip/somedir/main.css
+t/fixtures/prj2_skip/thisdirmustbeignored/b1.css
 t/fixtures/prjless/.csswatcher
 t/fixtures/prjless/less/main.less
 t/fixtures/prjless/less/t.less
