@@ -6,6 +6,7 @@ lib/CSS/Watcher/Parser.pm
 lib/CSS/Watcher/ParserLess.pm
 Makefile.PL
 MANIFEST			This list of files
+MANIFEST.SKIP
 META.json
 META.yml
 README.md
@@ -15,7 +16,6 @@ t/02_monitor.t
 t/03_watcher.t
 t/04_watcher_less.t
 t/fixtures/prj1/.csswatcher
-t/fixtures/prj1/css/css
 t/fixtures/prj1/css/ignored.css
 t/fixtures/prj1/css/index.html
 t/fixtures/prj1/css/override.css
@@ -28,3 +28,8 @@ t/fixtures/prjless/.csswatcher
 t/fixtures/prjless/less/main.less
 t/fixtures/prjless/less/t.less
 t/fixtures/prjless/less/var.less
+t/manifest.t
+t/fixtures/prj2_skip/.csswatcher
+t/fixtures/prj2_skip/thisdirmustbeignored/b1.css
+t/fixtures/prj2_skip/somedir/main.css
+t/fixtures/prj2_skip/somedir/1.css
