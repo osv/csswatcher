@@ -16,7 +16,7 @@ use CSS::Watcher::Parser;
 use CSS::Watcher::ParserLess;
 use CSS::Watcher::Monitor;
 
-our $VERSION = '0.4.8';
+our $VERSION = '0.4.9';
 
 use constant DEFAULT_HTML_STUFF_DIR => '~/.emacs.d/ac-html-csswatcher/completion/';
 
