@@ -16,7 +16,7 @@ use CSS::Watcher::Parser;
 use CSS::Watcher::ParserLess;
 use CSS::Watcher::Monitor;
 
-our $VERSION = '0.4.9';
+our $VERSION = '0.5.0';
 
 use constant DEFAULT_HTML_STUFF_DIR => '~/.emacs.d/ac-html-csswatcher/completion/';
 
@@ -141,18 +141,25 @@ sub _parse_less_and_imports {
 
     my $parsed_files = 1; # 1, cause we parse $file for sure., ++ if dependencies parsed too
 
-    $self->_parse_less ($project, $file);
+    eval {
+        $self->_parse_less ($project, $file);
 
-    while (my ($less_fname, $imports) = each %{$project->{imports_less}}) {
-        foreach (@{$imports}) {
-            if ($file eq $_) {
-                next if (any {$_ eq $less_fname} @{$project->{parsed_files}});
-                INFO sprintf "  %s required by %s, parse them too.", path($file)->basename, path($less_fname)->basename;
-                $self->_parse_less($project, $less_fname);
-                $parsed_files++;
+        while (my ($less_fname, $imports) = each %{$project->{imports_less}}) {
+            foreach (@{$imports}) {
+                if ($file eq $_) {
+                    next if (any {$_ eq $less_fname} @{$project->{parsed_files}});
+                    INFO sprintf "  %s required by %s, parse them too.", path($file)->basename, path($less_fname)->basename;
+                    $self->_parse_less($project, $less_fname);
+                    $parsed_files++;
+                }
             }
         }
-    }
+        1;
+    } or do {
+        ERROR qq{Less parse fail: "$file", reason: "$@"};
+        return 1;
+    };
+
     return $parsed_files;
 }
 
